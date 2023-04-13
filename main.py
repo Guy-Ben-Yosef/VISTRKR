@@ -15,6 +15,9 @@ def print_hi(name):
     b = np.array([4, 5, 6])
     print(b)
 
+    c = np.array([7, 8, 9])
+    print(c)
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
