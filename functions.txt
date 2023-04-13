@@ -25,3 +25,4 @@ function approximation_wlsqr(n_positions)
 # Note: the above functions are just examples of what you might need to do. You can
 #       use different functions, or even different approaches, as long as you can
 #       explain your approach in the report.
+#       You can also use the functions provided in the starter code.
