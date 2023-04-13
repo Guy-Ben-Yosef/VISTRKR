@@ -12,6 +12,9 @@ def print_hi(name):
     print(a)
     print(f'Bye, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
 
+    b = np.array([4, 5, 6])
+    print(b)
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
