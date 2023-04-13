@@ -10,7 +10,7 @@ def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
     a = np.array([1, 2, 3])
     print(a)
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+    print(f'Bye, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
 
 
 # Press the green button in the gutter to run the script.
