@@ -1,3 +1,5 @@
+import numpy as np
+
 # This is a sample Python script.
 
 # Press Shift+F10 to execute it or replace it with your code.
@@ -6,6 +8,8 @@
 
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
+    a = np.array([1, 2, 3])
+    print(a)
     print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
 
 
