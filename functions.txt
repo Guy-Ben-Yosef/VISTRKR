@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 funtcion pixel2polar(pixel_loc, calibration)
 	...
 	return polar_loc
@@ -23,3 +24,28 @@ function approximation_wlsqr(n_positions)
     return position  # position approximated by weighted-least-squares method
 
 # Note: the above functions are just examples of what you might need to do. You can
+=======
+funtcion pixel2polar(pixel_loc, calibration)
+	...
+	return polar_loc
+	
+	
+function triangulation(cam_A_data, cam_B_data)
+    ...
+    return position  # position calculated by triangulation of two cameras
+    
+    
+function approximation_lsqr(n_positions)
+    ...
+    return position  # position approximated by least-squares method
+    
+
+function calc_error_on_approx_position(position, cam_A_data, cam_B_data)
+    ...
+    return R
+    
+    
+function approximation_wlsqr(n_positions)
+    ...
+    return position  # position approximated by weighted-least-squares method
+>>>>>>> origin/master
