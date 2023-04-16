@@ -1,29 +1,20 @@
-import numpy as np
-
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import numpy as np  # comment
 
 
 def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    a = np.array([1, 2, 3])
-    print(a)
-    print(f'Bye, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+    first = np.array([1, 2, 3])
+    print(first)
+    print(f'Bye, {name}')
 
-    b = np.array([4, 5, 6])
-    print(b)
+    second = np.array([4, 5, 6])
+    print(second)
 
-    c = np.array([7, 8, 9])
-    print(c)
+    third = np.array([7, 8, 9])
+    print(third)
 
-    d = np.array([10, 11, 12])
-    print(a, b, c, d)
+    fourth = np.array([10, 11, 12])
+    print(first, second, third, fourth)
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
