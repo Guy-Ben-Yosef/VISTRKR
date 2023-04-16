@@ -1,5 +1,6 @@
 import numpy as np
 
+from calibration.save_camera_position import save_values
 # This is a sample Python script.
 
 # Press Shift+F10 to execute it or replace it with your code.
@@ -24,6 +25,7 @@ def print_hi(name):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    parameters = {'name': 'try1',
+                  'value': 3}
+    save_values(parameters)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
