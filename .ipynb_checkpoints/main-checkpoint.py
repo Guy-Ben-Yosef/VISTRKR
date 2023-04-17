@@ -1,5 +1,7 @@
-import numpy as np
-from calibration.save_camera_position import save_values
+"""
+This code bla bla bla...
+"""
+import numpy as np  # comment
 
 
 def print_hi(name):
@@ -35,6 +37,4 @@ def print_hi(name):
 
 
 if __name__ == '__main__':
-    parameters = {'name': 'try1',
-                  'value': 3}
-    save_values(parameters)
+    print_hi('PyCharm')
