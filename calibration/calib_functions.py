@@ -17,57 +17,50 @@ def lin_pix2ang(pix, total_pix_num, angle_of_view):
     return (0.5 - (pix + 1) / total_pix_num) * angle_of_view if pix >= 0 else None
 
 
-
-def calculate_calibration_params(calibration_results, round_number=1):
+def calculate_calibration_params(expected_angles, measured_angles):
     """
-    Calculate calibration parameters from calibration results.
+    Calculate calibration parameters from expected and measured angles.
 
-    This function takes in a 2D array of calibration results, where each row represents a round of calibration and each
-    column represents a calibration parameter. It calculates the slope (m) and intercept (b) of the linear model 
-    fitted to the expected and measured angles at the minimum, maximum, and median angles of the current round. It also
-    computes the coefficient of determination (R^2) to evaluate the goodness of fit of the linear model. Additionally,
-    it creates a mask to exclude the median point from the non-calibrated points.
+    This function takes in two 1D arrays of expected and measured angles, and calculates the slope (m) and
+    intercept (b) of the linear model fitted to the expected and measured angles at the minimum, maximum, and
+    median angles. It also computes the coefficient of determination (R^2) to evaluate the goodness of fit of
+    the linear model. Additionally, it creates a mask to exclude the median point from the non-calibrated points.
 
     Args:
-    calibration_results (numpy.ndarray): A 2D array of calibration results.
-    round_number (int): The current round number of calibration. Default is 1.
+    expected_angles (numpy.ndarray): A 1D array of expected angles.
+    measured_angles (numpy.ndarray): A 1D array of measured angles.
 
     Returns:
     float: The slope (m) of the linear model.
     float: The intercept (b) of the linear model.
     float: The coefficient of determination (R^2).
-    numpy.ndarray: A boolean mask indicating the non-calibrated points in the current round.
+    numpy.ndarray: A boolean mask indicating the non-calibrated points.
     """
-    
-    # Extract the vector of angles for the current round
-    angles = calibration_results[round_number, :]
-    
     # Select the indices of the points at the minimum, maximum, and median angles
-    index_min = 0
-    index_max = -1
-    index_median = len(angles) // 2
-    
+    index_min, index_max, index_median = (0, -1, len(expected_angles) // 2)
+
     # Select the expected and measured angles for the points at the minimum, maximum, and median angles
-    expected_angles = [calibration_results[0, index_min], calibration_results[0, index_median], calibration_results[0, index_max]]
-    measured_angles = [angles[index_min], angles[index_median], angles[index_max]]
-    
+    expected_angles_points = [expected_angles[index_min], expected_angles[index_median], expected_angles[index_max]]
+    measured_angles_points = [measured_angles[index_min], measured_angles[index_median], measured_angles[index_max]]
+
     # Fit a linear model to the data
-    coef, residuals, _, _, _ = np.polyfit(expected_angles, measured_angles, deg=1, full=True)
+    coef, residuals, _, _, _ = np.polyfit(expected_angles_points, measured_angles_points, deg=1, full=True)
     slope = coef[0]
     intercept = coef[1]
     residuals = residuals[0]
-    
+
     # Compute R^2
     total_sum_of_squares = sum((measured_angles - np.mean(measured_angles))**2)
     r_squared = 1 - (residuals / total_sum_of_squares)
-    
+
     # Create a mask to exclude the median point from the non-calibrated points
-    mask_non_calibrated = np.arange(len(angles)) != index_median
+    mask_non_calibrated = np.arange(len(measured_angles)) != index_median
     mask_non_calibrated[0] = False
     mask_non_calibrated[-1] = False
-    
+
     # Return the slope, intercept, R^2, and mask for the non-calibrated points
     return slope, intercept, r_squared, mask_non_calibrated
+
 
 
 
