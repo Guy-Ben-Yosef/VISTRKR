@@ -1,5 +1,6 @@
 '''This file is for blah bla bla'''
 import numpy as np
+import warnings
 
 
 def lin_pix2ang(pix, total_pix_num, angle_of_view):
@@ -21,10 +22,11 @@ def calculate_calibration_params(expected_angles, measured_angles):
     """
     Calculate calibration parameters from expected and measured angles.
 
-    This function takes in two 1D arrays of expected and measured angles, and calculates the slope (m) and
-    intercept (b) of the linear model fitted to the expected and measured angles at the minimum, maximum, and
-    median angles. It also computes the coefficient of determination (R^2) to evaluate the goodness of fit of
-    the linear model. Additionally, it creates a mask to exclude the median point from the non-calibrated points.
+    This function takes in two 1D arrays of expected and measured angles, and calculates
+    the slope (m) and intercept (b) of the linear model fitted to the expected and measured
+    angles at the minimum, maximum, and median angles. It also computes the coefficient of
+    determination (R^2) to evaluate the goodness of fit of the linear model. Additionally,
+    it creates a mask to exclude the median point from the non-calibrated points.
 
     Args:
     expected_angles (numpy.ndarray): A 1D array of expected angles.
@@ -39,12 +41,16 @@ def calculate_calibration_params(expected_angles, measured_angles):
     # Select the indices of the points at the minimum, maximum, and median angles
     index_min, index_max, index_median = (0, -1, len(expected_angles) // 2)
 
-    # Select the expected and measured angles for the points at the minimum, maximum, and median angles
-    expected_angles_points = [expected_angles[index_min], expected_angles[index_median], expected_angles[index_max]]
-    measured_angles_points = [measured_angles[index_min], measured_angles[index_median], measured_angles[index_max]]
+    # Select the expected and measured angles for the points at the minimum,
+    # maximum, and median angles
+    expected_angles_points = [expected_angles[index_min],
+                              expected_angles[index_median], expected_angles[index_max]]
+    measured_angles_points = [measured_angles[index_min],
+                              measured_angles[index_median], measured_angles[index_max]]
 
     # Fit a linear model to the data
-    coef, residuals, _, _, _ = np.polyfit(expected_angles_points, measured_angles_points, deg=1, full=True)
+    coef, residuals, _, _, _ = np.polyfit(expected_angles_points, 
+                                          measured_angles_points, deg=1, full=True)
     slope = coef[0]
     intercept = coef[1]
     residuals = residuals[0]
@@ -57,6 +63,9 @@ def calculate_calibration_params(expected_angles, measured_angles):
     mask_non_calibrated = np.arange(len(measured_angles)) != index_median
     mask_non_calibrated[0] = False
     mask_non_calibrated[-1] = False
+
+    if r_squared < 0.95:
+        warnings.warn(f"Too small residual (R^2 = {r_squared:0.3f})")
 
     # Return the slope, intercept, R^2, and mask for the non-calibrated points
     return slope, intercept, r_squared, mask_non_calibrated
