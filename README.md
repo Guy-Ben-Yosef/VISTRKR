@@ -1,4 +1,4 @@
-https://user-images.githubusercontent.com/64026118/232827179-4b359770-7afc-4998-afb8-028b5a327bfe.png
+<img src="https://user-images.githubusercontent.com/64026118/232827179-4b359770-7afc-4998-afb8-028b5a327bfe.png" width="48">
 
 VISTRKR is a subproject under the DroNet project, which is developed by 4th year aerospace engineering students. DroNet aims to create a system for locating, tracking, and intercepting hostile drones using a group of drones and a net. VISTRKR specifically focuses on the optical solution for locating and tracking the hostile drone using optical systems.
 
