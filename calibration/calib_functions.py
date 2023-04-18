@@ -102,3 +102,7 @@ def foo2(var):
 
 def foo3(var):
     return None
+
+
+def foo4(var):
+    return None
