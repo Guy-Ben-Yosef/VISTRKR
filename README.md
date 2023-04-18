@@ -1,3 +1,5 @@
+![circleWbackground](https://user-images.githubusercontent.com/64026118/232827179-4b359770-7afc-4998-afb8-028b5a327bfe.png)
+
 VISTRKR is a subproject under the DroNet project, which is developed by 4th year aerospace engineering students. DroNet aims to create a system for locating, tracking, and intercepting hostile drones using a group of drones and a net. VISTRKR specifically focuses on the optical solution for locating and tracking the hostile drone using optical systems.
 
 This repository contains the Python files that implement the algorithms for VISTRKR. The code is designed to process visual data from optical systems, such as cameras or sensors, to accurately locate and track hostile drones in real-time. The algorithms are optimized for performance and accuracy, utilizing techniques such as image processing, computer vision, and machine learning.
@@ -8,4 +10,3 @@ Main Features:
 * Real-time tracking: The algorithms are optimized for real-time tracking of hostile drones, allowing for quick and accurate response to changing situations.
 * Performance optimization: The code is designed to be efficient and optimized for performance, ensuring minimal processing delay and high accuracy.
 * Python implementation: The algorithms are implemented in Python, making it easy to integrate into existing systems and workflows.
-![VISTRKR_Logo1](https://user-images.githubusercontent.com/64026118/232573381-8ac14c51-97b1-4697-9b72-2ab2546c2a29.png)
