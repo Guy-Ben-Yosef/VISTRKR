@@ -1,6 +1,6 @@
-'''This file is for blah bla bla'''
-import numpy as np
+'''Calbration related functions library.'''
 import warnings
+import numpy as np
 
 
 def lin_pix2ang(pix, total_pix_num, angle_of_view):
@@ -92,3 +92,21 @@ def foo(p_i_locations, data, base_locations, cam_data):
         azimuth = np.rad2deg(np.arctan2(delta_y, delta_x)) - cam_data['a']  # Calculate the azimuth angle
         result[0, i] = azimuth  # Store the expected azimuth angle in the result array
         result[1, i] = lin_pix2ang(cam_data[point_name][0], cam_data['total_pix_num'], cam_data['AOV'])  # Store the measurements in the result array
+    
+    return None
+
+
+def foo2(var):
+    pass
+
+
+def foo3(var):
+    return None
+
+
+def foo4(var):
+    return None
+
+
+def foo5(var):
+    return None
