@@ -98,3 +98,7 @@ def foo(p_i_locations, data, base_locations, cam_data):
 
 def foo2(var):
     pass
+
+
+def foo3(var):
+    return None
