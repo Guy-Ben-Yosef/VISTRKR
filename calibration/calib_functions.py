@@ -94,19 +94,3 @@ def foo(p_i_locations, data, base_locations, cam_data):
         result[1, i] = lin_pix2ang(cam_data[point_name][0], cam_data['total_pix_num'], cam_data['AOV'])  # Store the measurements in the result array
     
     return None
-
-
-def foo2(var):
-    pass
-
-
-def foo3(var):
-    return None
-
-
-def foo4(var):
-    return None
-
-
-def foo5(var):
-    return None
