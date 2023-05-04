@@ -31,3 +31,7 @@ def calculate_expected_angles(camera_position, points, camera_azimuth):
         azimuth = np.rad2deg(np.arctan2(delta_y, delta_x)) - camera_azimuth  # Calculate the azimuth angle
         expected_angles.append(azimuth)
     return expected_angles
+
+
+def foo(a, b):
+    return a + b
