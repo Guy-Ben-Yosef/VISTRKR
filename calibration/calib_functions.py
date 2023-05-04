@@ -1,4 +1,6 @@
-'''Calbration related functions library.'''
+"""
+Calbration related functions library.
+"""
 import warnings
 import numpy as np
 
@@ -6,13 +8,13 @@ import numpy as np
 def lin_pix2ang(pix, total_pix_num, angle_of_view):
     """
     Converts pixel coordinates to angular coordinates using linear interpolation.
-    
-    Args:
+
+    :param
     pix (int): The pixel coordinate to convert.
     total_pix_num (int): The total number of pixels.
     angle_of_view (float): The angle of view in degrees.
-    
-    Returns:
+
+    :return
     float or None: The angular coordinate in degrees if pix >= 0, otherwise None.
     """
     return (0.5 - (pix + 1) / total_pix_num) * angle_of_view if pix >= 0 else None
@@ -28,29 +30,19 @@ def calculate_calibration_params(expected_angles, measured_angles):
     determination (R^2) to evaluate the goodness of fit of the linear model. Additionally,
     it creates a mask to exclude the median point from the non-calibrated points.
 
-    Args:
+    :param
     expected_angles (numpy.ndarray): A 1D array of expected angles.
     measured_angles (numpy.ndarray): A 1D array of measured angles.
 
-    Returns:
+    :return
     float: The slope (m) of the linear model.
     float: The intercept (b) of the linear model.
     float: The coefficient of determination (R^2).
     numpy.ndarray: A boolean mask indicating the non-calibrated points.
     """
-    # Select the indices of the points at the minimum, maximum, and median angles
-    index_min, index_max, index_median = (0, -1, len(expected_angles) // 2)
-
-    # Select the expected and measured angles for the points at the minimum,
-    # maximum, and median angles
-    expected_angles_points = [expected_angles[index_min],
-                              expected_angles[index_median], expected_angles[index_max]]
-    measured_angles_points = [measured_angles[index_min],
-                              measured_angles[index_median], measured_angles[index_max]]
 
     # Fit a linear model to the data
-    coef, residuals, _, _, _ = np.polyfit(expected_angles_points, 
-                                          measured_angles_points, deg=1, full=True)
+    coef, residuals, _, _, _ = np.polyfit(expected_angles, measured_angles, deg=1, full=True)
     slope = coef[0]
     intercept = coef[1]
     residuals = residuals[0]
