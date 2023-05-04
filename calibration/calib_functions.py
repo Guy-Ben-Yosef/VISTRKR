@@ -3,6 +3,18 @@ import warnings
 import numpy as np
 
 
+def calculate_expected_angles(camera_position, points, camera_azimuth):
+    expected_angles = []
+    for point in points:
+        x = point[0]
+        y = point[1]
+        delta_x = x - camera_position[0]  # Calculate the difference in x coordinates
+        delta_y = y - camera_position[1]  # Calculate the difference in y coordinates
+        azimuth = np.rad2deg(np.arctan2(delta_y, delta_x)) - camera_azimuth  # Calculate the azimuth angle
+        expected_angles.append(azimuth)
+    return expected_angles
+
+
 def calculate_calibration_params(measured_pixels, expected_angles, fit_degree):
     coefficients, residuals, _, _, _, = np.polyfit(measured_pixels, expected_angles, deg=fit_degree, full=True)
     slope = coefficients[0]
@@ -18,15 +30,3 @@ def calculate_calibration_params(measured_pixels, expected_angles, fit_degree):
 
     # Return the slope, intercept, R^2, and mask for the non-calibrated points
     return slope, intercept, r_squared
-
-
-def calculate_expected_angles(camera_position, points, camera_azimuth):
-    expected_angles = []
-    for point in points:
-        x = point[0]
-        y = point[1]
-        delta_x = x - camera_position[0]  # Calculate the difference in x coordinates
-        delta_y = y - camera_position[1]  # Calculate the difference in y coordinates
-        azimuth = np.rad2deg(np.arctan2(delta_y, delta_x)) - camera_azimuth  # Calculate the azimuth angle
-        expected_angles.append(azimuth)
-    return expected_angles
