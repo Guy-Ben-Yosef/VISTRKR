@@ -2,7 +2,6 @@
 import warnings
 import numpy as np
 
-
 def calculate_expected_angles(camera_position, points, camera_azimuth):
     """
     Calculates the expected azimuth angles for a set of points relative to a camera position and azimuth angle.
