@@ -8,7 +8,7 @@ from estimation import estim_functions
 
 def test_calib():
     expected_angles = calib_functions.calculate_expected_angles(
-        camera_position=[0, 0], points=[(1, 1), (4.8, 4), (5.32, 6.87), (7.84, 9.22)], camera_azimuth=45)
+        camera_data={'position': (0, 0), 'azimuth': 45}, points=[(1, 1), (4.8, 4), (5.32, 6.87), (7.84, 9.22)])
     pixels = [1.85, -2.92, 8.8, 6.23]
     m, b, R = calib_functions.calculate_calibration_params(
         measured_pixels=pixels, expected_angles=expected_angles, fit_degree=1)
@@ -16,12 +16,15 @@ def test_calib():
 
 
 def test_estim():
+    camera_a_data = {'position': (20, 0), 'azimuth': 135}
+    camera_b_data = {'position': (0, 0), 'azimuth': 45}
+
     import matplotlib.pyplot as plt
 
     deltas = np.arange(0, 20, 0.1)
     result = np.zeros(deltas.shape)
     for i, delta in enumerate(deltas):
-        error = estim_functions.get_error((20, 0), (0, 0), delta, np.array([10, 10]))
+        error = estim_functions.get_error(camera_a_data, camera_b_data, delta, np.array([10, 10]))
         result[i] = error
 
     fig, ax = plt.subplots()
@@ -33,6 +36,6 @@ def test_estim():
 
 
 if __name__ == '__main__':
-    print(test_calib())
-    # print(test_estim())
-    print(calibration.calib_functions.calculate_expected_angles((20, 0), [(10, 10)], 134))
+    cam_a_dat = {'position': (1.72, 3.35), 'azimuth': 333}
+    cam_b_dat = {'position': (11.22, -1.44), 'azimuth': 153.5}
+    print(estim_functions.get_error(cam_a_dat, cam_b_dat, .5, np.array([8.9, -0.31])))

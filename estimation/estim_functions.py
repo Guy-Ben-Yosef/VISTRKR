@@ -3,8 +3,7 @@ This module contains functions for estimating the position of an object using tr
 """
 
 import numpy as np
-import pandas as pd
-from numpy import tan, rad2deg, deg2rad, array, zeros, sqrt
+from calibration.calib_functions import calculate_expected_angles
 
 
 def tand(x):
@@ -41,26 +40,26 @@ def triangulation(camera_a_data, sight_angle_a, camera_b_data, sight_angle_b):
     return np.array([x, y])
 
 
-def get_error(camera_a_position, camera_b_position, delta, target_position):
+def get_error(camera_a_data, camera_b_data, delta, target_position):
     """
     Computes the maximum error for an estimated position of an object.
 
-    @param camera_a_position: (tuple) X and Y coordinates of camera A.
-    @param camera_b_position: (tuple) X and Y coordinates of camera B.
+    @param camera_a_data: (dict) A dictionary containing the position and azimuth angle of camera A.
+    @param camera_b_data: (dict) A dictionary containing the position and azimuth angle of camera B.
     @param delta: (float) Incremental value used to compute the error.
     @param target_position: (numpy.array) True X and Y coordinates of the object.
     @return: (float) Maximum error for the estimated position of the object.
     """
 
-    azimuth_a = 3  # Expected azimuth angle of camera A in degrees.
-    azimuth_b = 3  # ...                          ... B ...
-
+    # Expected azimuth angle of cameras A and B in degrees.
+    azimuth_a = camera_a_data['azimuth'] + calculate_expected_angles(camera_a_data, tuple(target_position))
+    azimuth_b = camera_b_data['azimuth'] + calculate_expected_angles(camera_b_data, tuple(target_position))
 
     # Estimate object positions for each combination of expected azimuth angles
-    pp = triangulation(camera_a_position, azimuth_a + delta, camera_b_position, azimuth_b + delta)
-    mm = triangulation(camera_a_position, azimuth_a - delta, camera_b_position, azimuth_b - delta)
-    pm = triangulation(camera_a_position, azimuth_a + delta, camera_b_position, azimuth_b - delta)
-    mp = triangulation(camera_a_position, azimuth_a - delta, camera_b_position, azimuth_b + delta)
+    pp = triangulation(camera_a_data, + delta, camera_b_data, + delta)
+    mm = triangulation(camera_a_data, - delta, camera_b_data, - delta)
+    pm = triangulation(camera_a_data, + delta, camera_b_data, - delta)
+    mp = triangulation(camera_a_data, - delta, camera_b_data, + delta)
 
     # Compute error for each estimated position and store in array
     errors = np.linalg.norm(np.array([pp, mm, pm, mp]) - target_position, axis=1)

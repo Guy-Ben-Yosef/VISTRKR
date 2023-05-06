@@ -2,18 +2,23 @@
 import warnings
 import numpy as np
 
-def calculate_expected_angles(camera_position, points, camera_azimuth):
+
+def calculate_expected_angles(camera_data, points):
     """
     Calculates the expected azimuth angles for a set of points relative to a camera position and azimuth angle.
 
-    @param camera_position: (tuple of floats) The (x, y) coordinates of the camera position.
+    @param camera_data: (dict) A dictionary containing the position and azimuth angle in degrees of the camera.
     @param points: (array-like) A list or array of (x, y) coordinate pairs for the points of interest.
-    @param camera_azimuth: (float) The azimuth angle (in degrees) of the camera.
     @return: (list of floats) A list of expected azimuth angles (in degrees) for the given points relative to the camera position and azimuth angle.
     """
+    if not isinstance(points, list):
+        points = [points]
     # Check that each point in points is a tuple of length 2
     if any(not isinstance(p, tuple) or len(p) != 2 for p in points):
         raise TypeError("Each point in points must be a tuple of length 2.")
+
+    camera_position = camera_data['position']
+    camera_azimuth = camera_data['azimuth']
 
     expected_angles = []
     for point in points:
@@ -24,7 +29,7 @@ def calculate_expected_angles(camera_position, points, camera_azimuth):
         azimuth = np.rad2deg(np.arctan2(delta_y, delta_x)) - camera_azimuth  # Calculate the azimuth angle
         expected_angles.append(azimuth)
 
-    return expected_angles
+    return expected_angles if len(expected_angles) > 1 else expected_angles[0]
 
 
 def calculate_calibration_params(measured_pixels, expected_angles, fit_degree=1):
