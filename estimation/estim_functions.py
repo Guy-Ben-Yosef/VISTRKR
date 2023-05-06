@@ -65,3 +65,13 @@ def get_error(camera_a_data, camera_b_data, delta, target_position):
     errors = np.linalg.norm(np.array([pp, mm, pm, mp]) - target_position, axis=1)
 
     return max(errors)
+
+
+def weighted_estimation(points, weights):
+    """
+    Computes the weighted average of a set of points.
+    @param points: (np.array) An array containing the points to be averaged.
+    @param weights: (np.array) An array containing the weights of each point.
+    @return: (np.array) The weighted average of the points.
+    """
+    return (points.T * weights).sum(axis=1) / weights.sum()
