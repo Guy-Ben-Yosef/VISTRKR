@@ -6,14 +6,10 @@ def calculate_expected_angles(camera_position, points, camera_azimuth):
     """
     Calculates the expected azimuth angles for a set of points relative to a camera position and azimuth angle.
 
-    @param camera_position: tuple of floats
-        The (x, y) coordinates of the camera position.
-    @param points: array-like
-        A list or array of (x, y) coordinate pairs for the points of interest.
-    @param camera_azimuth: float
-        The azimuth angle (in degrees) of the camera.
-    @return: list of floats
-        A list of expected azimuth angles (in degrees) for the given points relative to the camera position and azimuth angle.
+    @param camera_position: (tuple of floats) The (x, y) coordinates of the camera position.
+    @param points: (array-like) A list or array of (x, y) coordinate pairs for the points of interest.
+    @param camera_azimuth: (float) The azimuth angle (in degrees) of the camera.
+    @return: (list of floats) A list of expected azimuth angles (in degrees) for the given points relative to the camera position and azimuth angle.
     """
     # Check that each point in points is a tuple of length 2
     if any(not isinstance(p, tuple) or len(p) != 2 for p in points):

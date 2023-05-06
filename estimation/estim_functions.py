@@ -16,25 +16,24 @@ def tand(x):
     return np.tan(np.deg2rad(x))
 
 
-def triangulation(camera_a_position, camera_a_azimuth, camera_b_position, camera_b_azimuth):
+def triangulation(camera_a_data, sight_angle_a, camera_b_data, sight_angle_b):
     """
-    Estimates the position of an object using triangulation method.
-    @param camera_a_position: (tuple) X and Y coordinates of camera A.
-    @param camera_a_azimuth: (float) Azimuth angle of camera A in degrees.
-    @param camera_b_position: (tuple) X and Y coordinates of camera B.
-    @param camera_b_azimuth: (float) Azimuth angle of camera B in degrees.
-    @return: (numpy array) Estimated X and Y coordinates of the object.
+    Computes the estimated X and Y coordinates of an object using triangulation method.
+    @param camera_a_data: (dict) A dictionary containing the position and azimuth angle of camera A.
+    @param sight_angle_a: (float) The sight angle of camera A to the object in degrees.
+    @param camera_b_data: (dict) A dictionary containing the position and azimuth angle of camera B.
+    @param sight_angle_b: (float) The sight angle of camera B to the object in degrees.
+    @return: (numpy.ndarray) An array containing the estimated X and Y coordinates of the object.
     """
-
-    # Get camera positions
-    x_a = camera_a_position[0]
-    y_a = camera_a_position[1]
-    x_b = camera_b_position[0]
-    y_b = camera_b_position[1]
+    # Rearrange data
+    x_a, y_a = camera_a_data['position']
+    az_a = camera_a_data['azimuth']
+    x_b, y_b = camera_b_data['position']
+    az_b = camera_b_data['azimuth']
 
     # Calculate the tangent of the azimuth angles
-    tan_phi_a = tand(camera_a_azimuth)
-    tan_phi_b = tand(camera_b_azimuth)
+    tan_phi_a = tand(az_a + sight_angle_a)
+    tan_phi_b = tand(az_b + sight_angle_b)
 
     # Calculate the estimated X and Y coordinates of the object
     x = 1 / (tan_phi_a - tan_phi_b) * (x_a * tan_phi_a - x_b * tan_phi_b - (y_a - y_b))
@@ -42,18 +41,21 @@ def triangulation(camera_a_position, camera_a_azimuth, camera_b_position, camera
     return np.array([x, y])
 
 
-def get_error(camera_a_position, azimuth_a, camera_b_position, azimuth_b, delta, target_position):
+def get_error(camera_a_position, camera_b_position, delta, target_position):
     """
     Computes the maximum error for an estimated position of an object.
 
     @param camera_a_position: (tuple) X and Y coordinates of camera A.
-    @param azimuth_a: (float) Expected azimuth angle of camera A in degrees.
     @param camera_b_position: (tuple) X and Y coordinates of camera B.
-    @param azimuth_b: (float) Expected azimuth angle of camera B in degrees.
     @param delta: (float) Incremental value used to compute the error.
     @param target_position: (numpy.array) True X and Y coordinates of the object.
     @return: (float) Maximum error for the estimated position of the object.
     """
+
+    azimuth_a = 3  # Expected azimuth angle of camera A in degrees.
+    azimuth_b = 3  # ...                          ... B ...
+
+
     # Estimate object positions for each combination of expected azimuth angles
     pp = triangulation(camera_a_position, azimuth_a + delta, camera_b_position, azimuth_b + delta)
     mm = triangulation(camera_a_position, azimuth_a - delta, camera_b_position, azimuth_b - delta)
