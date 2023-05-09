@@ -67,6 +67,45 @@ def get_error(camera_a_data, camera_b_data, delta, target_position):
     return max(errors)
 
 
+def closest_point_between_two_lines(L1, L2):
+    """
+    Computes the point in 3D space that is closest to two infinite lines.
+
+    Parameters
+    ----------
+    L1 : tuple
+        A tuple of two numpy arrays representing the first line in 3D space:
+        - The first array (shape 3,) represents a point `p1` on the line.
+        - The second array (shape 3,) represents a direction vector `v1` of the line.
+    L2 : tuple
+        A tuple of two numpy arrays representing the second line in 3D space:
+        - The first array (shape 3,) represents a point `p2` on the line.
+        - The second array (shape 3,) represents a direction vector `v2` of the line.
+
+    Returns
+    -------
+    result : numpy array
+        The coordinates of the point in 3D space that is closest to both lines.
+
+    Raises
+    ------
+    LinAlgError
+        If the system of linear equations is singular (i.e., the lines are parallel).
+    """
+    p1, v1 = (L1[0], L1[1])
+    p2, v2 = (L2[0], L2[1])
+    # Compute the vector connecting the lines
+    v3 = np.cross(v1, v2)
+
+    # Compute the parameter values for the point on line 1 closest to line 2
+    p_vec = np.array([(p2[i] - p1[i]) for i in range(3)])
+    v_mat = np.array([v1, -v2, v3])
+    lambdas = np.dot(p_vec, np.linalg.inv(v_mat.T))
+
+    # Compute the coordinates of the closest point on line 1
+    return (p1 + lambdas[0] * v1 + p2 + lambdas[1] * v2) / 2
+
+
 def weighted_estimation(points, weights):
     """
     Computes the weighted average of a set of points.
