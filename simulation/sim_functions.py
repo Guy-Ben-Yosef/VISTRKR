@@ -1,6 +1,18 @@
 from calibration.calib_functions import *
 
 
+def addWhiteGaussianNoise(pixel, std):
+    """
+    Adds white Gaussian noise to a pixel value.
+
+    @param pixel: (int) The pixel value to add noise to.
+    @param std: (float) The standard deviation of the noise.
+    @return: (int) The pixel value with added noise.
+    """
+    # TODO: implement this function
+    return
+
+
 def point2pixel(point, camera_data):
     """
     Converts a point to a pixel value for a given camera.
