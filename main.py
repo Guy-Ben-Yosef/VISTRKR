@@ -17,7 +17,7 @@ def calibrate_cameras(cameras_data, calibration_data):
     updated_cameras_data = []
     for camera in cameras_data:
         expected_angles = calib_functions.calculate_expected_angles(camera, points)
-        camera['calibration'] = calib_functions.calculate_calibration_params(pixels, expected_angles)
+        camera['calibration'] = calib_functions.calculate_calibration_params(pixels[camera['name']], expected_angles)
 
         updated_cameras_data.append(camera)
     return updated_cameras_data
@@ -43,8 +43,18 @@ def estimate_position(cameras_data, measurements):
 
 
 if __name__ == '__main__':
+    # Data arrangement
+    from data.experiment_data import *
+    calibration_data = {}
+    calibration_data['points'] = list(p_i_locations.values())
+    calibration_data['pixels'] = {'O': list(data_O.values()),
+                                  'Dx': list(data_Dx.values()),
+                                  'By': list(data_By.values())}
+
     cam_O = {'name': 'O', 'position': (0, 0), 'azimuth': 45}
     cam_Dx = {'name': 'Dx', 'position': (20, 0), 'azimuth': 135}
     cam_By = {'name': 'By', 'position': (0, 10), 'azimuth': 0}
+
+    # Calibrate cameras
     cameras_data = calibrate_cameras([cam_O, cam_Dx, cam_By], calibration_data)
     x, y = estimate_position(cameras_data, measurements)
