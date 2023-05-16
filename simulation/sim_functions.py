@@ -1,7 +1,8 @@
 from calibration.calib_functions import *
+from numpy.random import normal
 
 
-def addWhiteGaussianNoise(pixel, std):
+def add_white_gaussian_noise(pixel, std):
     """
     Adds white Gaussian noise to a pixel value.
 
@@ -9,8 +10,8 @@ def addWhiteGaussianNoise(pixel, std):
     @param std: (float) The standard deviation of the noise.
     @return: (int) The pixel value with added noise.
     """
-    # TODO: implement this function
-    return
+    s = normal(0, std)
+    return int(pixel + s)
 
 
 def point2pixel(point, camera_data):
@@ -47,3 +48,19 @@ def phi2pixel(phi, calibration_data):
 
     pixel = round((phi - intercept) / slope)
     return pixel
+
+
+def generate_points(foo, x_limits, y_limits, density):
+    x_vec = np.linspace(x_limits[0], x_limits[1], density)
+    y_vec = foo(x_vec)
+    mask = (y_limits[0] <= y_vec) & (y_vec <= y_limits[1])
+
+    x_vec = x_vec[mask]
+    y_vec = y_vec[mask]
+
+    result = []
+
+    for i in range(sum(mask)):
+        result.append((x_vec[i], y_vec[i]))
+
+    return result

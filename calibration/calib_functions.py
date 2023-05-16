@@ -65,3 +65,21 @@ def calculate_calibration_params(measured_pixels, expected_angles, fit_degree=1)
         warnings.warn(f"too small residual (R^2 = {r_squared:0.3f})")
 
     return slope, intercept, r_squared
+
+
+def pixel2phi(pixel, camera_data):
+    """
+    Converts a pixel coordinate to a corresponding angle in degrees, using calibration parameters of a camera.
+
+    @param pixel: (float) Pixel coordinate to be converted to an angle.
+    @param camera_data: (dict) Dictionary containing camera calibration parameters, including slope and intercept.
+    @return: Angle in radians corresponding to the input pixel coordinate, using the slope and intercept calibration
+             parameters of the camera.
+    """
+    # Extract the calibration parameters for the camera
+    slope, intercept, _ = camera_data['calibration']
+
+    # Convert the pixel coordinate to an angle using the slope and intercept
+    phi = slope * pixel + intercept
+
+    return phi
