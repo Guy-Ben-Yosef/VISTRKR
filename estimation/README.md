@@ -1,3 +1,11 @@
+# Estimation Algorithm Flowchart
+
+<p align="center">
+  <img src="https://github.com/theguyben/VISTRKR/assets/64026118/0174ebdf-76b9-4750-bb70-4fde93d2e56d" />
+</p>
+
+---
+
 # Object Position Estimation
 This Python file contains functions for estimating the position of an object using the triangulation method. The functions provided are summarized below:
 
