@@ -1,13 +1,13 @@
 # Calibration Functions
 This Python file contains a library of functions related to calibration. The functions provided are summarized below:
 
-## calculate_expected_angles
+## `calculate_expected_angles`
 This function calculates the expected azimuth angles for a set of points relative to a camera position and azimuth angle. It takes two parameters:
 - `camera_data`: A dictionary containing the position and azimuth angle in degrees of the camera.
 - points: A list or array of $(x, y)$ coordinate pairs for the points of interest.
 The function returns a list of expected azimuth angles (in degrees) for the given points relative to the camera position and azimuth angle.
 
-calculate_calibration_params
+## `calculate_calibration_params`
 This function calculates the calibration parameters for converting measured pixel values to expected angle values. It takes three parameters:
 
 measured_pixels: A one-dimensional array containing measured pixel values.
