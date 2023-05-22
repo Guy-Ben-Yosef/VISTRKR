@@ -48,6 +48,8 @@ def estimate_position(cameras_list, pixels_by_camera):
     for k in range(number_of_measurements):
         relevant_points = points_weights_by_pairs[:, :dimensions, k]
         relevant_weights = points_weights_by_pairs[:, dimensions, k]
+        relevant_weights = 1 / relevant_weights
+        relevant_weights = relevant_weights / np.linalg.norm(relevant_weights)
         results[k, :] = estim_functions.weighted_estimation(relevant_points, relevant_weights)
 
     return results
