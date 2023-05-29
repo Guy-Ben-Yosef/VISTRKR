@@ -122,6 +122,7 @@ def simulate_calibration(cameras_list, calibration_points, angle_error_std=5, pi
             angles_with_deployment_error, camera['angle_of_view'], camera['resolution'], pixel_error_std)
 
         camera['calibration'] = calib_functions.calculate_calibration_params(expected_pixels, expected_angles)
+        camera['calculated_azimuth'] = camera['azimuth'] + camera['calibration'][1] - camera['angle_of_view']/2
         updated_cameras_data.append(camera)
 
     return updated_cameras_data
