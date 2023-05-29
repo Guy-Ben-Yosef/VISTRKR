@@ -71,6 +71,10 @@ def simulate_data(cameras_list, points, noise_std):
     if not isinstance(points, list):
         points = [points]
 
+    # Ensure that cameras_list is a list
+    elif not isinstance(cameras_list, list):
+        cameras_list = [cameras_list]
+
     # Create an empty dictionary to store the measurements for each camera
     measurements = {}
 
@@ -110,9 +114,9 @@ if __name__ == '__main__':
 
     foo = lambda x: 1.5 * np.cos(x / 1.2) + 1.2 * x
 
-    p = sim_functions.generate_2d_points(foo, x_limits=[2, 18], y_limits=[2, 18], density=50)
+    p = sim_functions.generate_2d_points(foo, x_range=[2, 18], y_range=[2, 18], density=50)
 
-    measurements = simulate_data(cameras_data, p, noise_std=20)
+    measurements = simulate_data(cameras_data[0], p, noise_std=20)
     points = estimate_position(cameras_data, measurements)
 
     import matplotlib.pyplot as plt
