@@ -50,17 +50,36 @@ def phi2pixel(phi, calibration_data):
     return pixel
 
 
-def generate_points(foo, x_limits, y_limits, density):
-    x_vec = np.linspace(x_limits[0], x_limits[1], density)
-    y_vec = foo(x_vec)
-    mask = (y_limits[0] <= y_vec) & (y_vec <= y_limits[1])
+def generate_2d_points(function, x_range, y_range, density):
+    """
+    Generate a list of 2D points on a plane using a given function.
 
-    x_vec = x_vec[mask]
-    y_vec = y_vec[mask]
+    @param function: (callable) The function f(x) that defines the y-coordinate of the points.
+                                It should take a NumPy array of x-values as input and return
+                                a NumPy array of corresponding y-values.
+    @param x_range: (tuple) The range of x-values (x_min, x_max) for generating points.
+    @param y_range: (tuple) The range of y-values (y_min, y_max) to filter the points.
+    @param density: (int) The number of points to generate between x_min and x_max.
+    @return: (list) A list of generated points as tuples (x, y).
+    """
+    # Generate the x-coordinates
+    x_values = np.linspace(x_range[0], x_range[1], density)
 
-    result = []
+    # Evaluate the function at each x-coordinate to get the y-coordinates
+    y_values = function(x_values)
 
-    for i in range(sum(mask)):
-        result.append((x_vec[i], y_vec[i]))
+    # Create a mask to filter out points outside the y-range
+    mask = (y_range[0] <= y_values) & (y_values <= y_range[1])
 
-    return result
+    # Filter the x and y values based on the mask
+    x_filtered = x_values[mask]
+    y_filtered = y_values[mask]
+
+    # Create a list to store the generated points
+    points = []
+
+    # Iterate over the filtered values and add them as tuples to the points list
+    for i in range(len(x_filtered)):
+        points.append((x_filtered[i], y_filtered[i]))
+
+    return points
