@@ -83,3 +83,36 @@ def generate_2d_points(function, x_range, y_range, density):
         points.append((x_filtered[i], y_filtered[i]))
 
     return points
+
+
+def calculate_expected_pixels(expected_angles, angle_of_view, image_size):
+    """
+    Calculate the expected pixel positions on an image given the expected angles.
+
+    @param expected_angles: (float or list) The expected angles in degrees. If a single angle is provided, it will be
+                            converted to a list.
+    @param angle_of_view: (float) The camera's angle of view in degrees.
+    @param image_size: (tuple) The size of the image in pixels (width, height).
+    @return: (numpy.ndarray) An array containing the expected pixel positions.
+
+    Note:
+    The function assumes a centered perspective projection where the
+    horizontal field of view is symmetric around the camera's forward
+    direction.
+    """
+    # Ensure that expected_angles is a list
+    if not isinstance(expected_angles, list):
+        expected_angles = [expected_angles]
+
+    horizontal_pixels_number = image_size[0]
+    vertical_pixels_number = image_size[1]
+
+    expected_pixels = np.zeros(len(expected_angles))
+
+    # Calculate the expected pixel positions for each angle
+    for i, angle in enumerate(expected_angles):
+        # Convert angle to pixel position
+        pixel = round((0.5 - angle/angle_of_view) * (horizontal_pixels_number - 1))
+        expected_pixels[i] = pixel
+
+    return expected_pixels
