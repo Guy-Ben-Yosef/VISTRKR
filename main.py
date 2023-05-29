@@ -27,10 +27,15 @@ def calibrate_cameras(cameras_list, calibration_data):
 
 
 def estimate_position(cameras_list, pixels_by_camera):
-    number_of_measurements = len(pixels_by_camera[cameras_list[0]['name']])
+    if not isinstance(pixels_by_camera[cameras_list[0]['name']], list):
+        number_of_measurements = 1
+    else:
+        number_of_measurements = len(pixels_by_camera[cameras_list[0]['name']])
     expected_angles = {}
     for camera in cameras_list:
         expected_angles_for_camera = []
+
+        # TODO: Implement for single point/pixel/measurement as well
         for pixel in pixels_by_camera[camera['name']]:
             expected_angles_for_camera.append(calib_functions.pixel2phi(pixel, camera))
         expected_angles[camera['name']] = expected_angles_for_camera
