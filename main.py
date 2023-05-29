@@ -37,7 +37,7 @@ def estimate_position(cameras_list, pixels_by_camera):
 
         # TODO: Implement for single point/pixel/measurement as well
         for pixel in pixels_by_camera[camera['name']]:
-            expected_angles_for_camera.append(calib_functions.pixel2phi(pixel, camera))
+            expected_angles_for_camera.append(calib_functions.pixel2phi(camera, pixel))
         expected_angles[camera['name']] = expected_angles_for_camera
 
     dimensions = 2
@@ -100,35 +100,59 @@ def simulate_data(cameras_list, points, noise_std):
     return measurements
 
 
+def simulate_calibration(cameras_list, calibration_points, angle_error_std=5, pixel_error_std=5):
+    # Ensure that cameras_list is a list
+    if not isinstance(cameras_list, list):
+        cameras_list = [cameras_list]
+    # Ensure that `calibration_points` is a list, if not raise an error
+    if not isinstance(calibration_points, list):
+        raise TypeError('`calibration_points` must be a list of points.')
+    # Ensure that `calibration_points` contains at least 3 points
+    if len(calibration_points) < 3:
+        raise ValueError('At least 3 calibration points are required.')
+
+    updated_cameras_data = []
+    for camera in cameras_list:
+        expected_angles = calib_functions.calculate_expected_angles(camera, calibration_points)
+        angle_error = np.random.normal(0, angle_error_std)
+        angles_with_deployment_error = (np.array(expected_angles) - angle_error).tolist()
+        camera['true_azimuth'] = camera['azimuth'] + angle_error
+
+        expected_pixels = sim_functions.calculate_expected_pixels(
+            angles_with_deployment_error, camera['angle_of_view'], camera['resolution'], pixel_error_std)
+
+        camera['calibration'] = calib_functions.calculate_calibration_params(expected_pixels, expected_angles)
+        updated_cameras_data.append(camera)
+
+    return updated_cameras_data
+
+
 
 if __name__ == '__main__':
     # Data arrangement
-    from data.experiment_data import *
-    calibration_data = {}
-    calibration_data['points'] = list(p_i_locations.values())
-    calibration_data['pixels'] = {'O': list(data_O.values()),
-                                  'Dx': list(data_Dx.values()),
-                                  'By': list(data_By.values())}
+    from data.general import *
 
-    cam_O = {'name': 'O', 'position': (0, 0), 'azimuth': 45}
-    cam_Dx = {'name': 'Dx', 'position': (20, 0), 'azimuth': 135}
-    cam_By = {'name': 'By', 'position': (0, 10), 'azimuth': 0}
+    simulate_calibration(cameras_data, [(1, 10.5), (10, 9.5), (15, 15), (19, 9)], 10)
 
-    # Calibrate cameras
-    cameras_data = calibrate_cameras([cam_O, cam_Dx, cam_By], calibration_data)
+    NUMBER_OF_POINTS = 150
+    ERROR = 30  # pixel white gaussian noise STD
 
-    foo = lambda x: 1.5 * np.cos(x / 1.2) + 1.2 * x
+    foo = lambda x: 0.6 * (x - 5.8) ** 3 + 1.5 * (x - 5.8) ** 2 + -1.1 * x + 13
 
-    p = sim_functions.generate_2d_points(foo, x_range=[2, 18], y_range=[2, 18], density=50)
+    # Generate points using the sim_functions module
+    simulated_points = sim_functions.generate_2d_points(foo, x_range=[1, 19], y_range=[1, 19], density=NUMBER_OF_POINTS)
 
-    measurements = simulate_data(cameras_data, p, noise_std=20)
-    points = estimate_position(cameras_data, measurements)
+    # Simulate measurements using the cameras_data and generated points
+    measurements = simulate_data(cameras_data, simulated_points, noise_std=ERROR)
 
-    import matplotlib.pyplot as plt
-    fig, ax = plt.subplots()
+    # Estimate the position of the points using cameras_data and measurements
+    estimated_points = estimate_position(cameras_data, measurements)
 
-    p = np.array(p)
-
-    ax.plot(p[:, 0], p[:, 1], 'bo')
-    ax.plot(points[:, 0], points[:, 1], 'rx')
-    plt.show()
+    # import matplotlib.pyplot as plt
+    # fig, ax = plt.subplots()
+    #
+    # p = np.array(p)
+    #
+    # ax.plot(p[:, 0], p[:, 1], 'bo')
+    # ax.plot(points[:, 0], points[:, 1], 'rx')
+    # plt.show()
