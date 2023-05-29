@@ -9,7 +9,8 @@ def calculate_expected_angles(camera_data, points):
 
     @param camera_data: (dict) A dictionary containing the position and azimuth angle in degrees of the camera.
     @param points: (array-like) A list or array of (x, y) coordinate pairs for the points of interest.
-    @return: (list of floats) A list of expected azimuth angles (in degrees) for the given points relative to the camera position and azimuth angle.
+    @return: (list of floats) A list of expected azimuth angles (in degrees) for the given points relative to the camera
+             position and azimuth angle.
     """
     if not isinstance(points, list):
         points = [points]
@@ -67,12 +68,12 @@ def calculate_calibration_params(measured_pixels, expected_angles, fit_degree=1)
     return slope, intercept, r_squared
 
 
-def pixel2phi(pixel, camera_data):
+def pixel2phi(camera_data, pixel):
     """
     Converts a pixel coordinate to a corresponding angle in degrees, using calibration parameters of a camera.
 
-    @param pixel: (float) Pixel coordinate to be converted to an angle.
     @param camera_data: (dict) Dictionary containing camera calibration parameters, including slope and intercept.
+    @param pixel: (float) Pixel coordinate to be converted to an angle.
     @return: Angle in radians corresponding to the input pixel coordinate, using the slope and intercept calibration
              parameters of the camera.
     """
