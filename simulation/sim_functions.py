@@ -85,7 +85,7 @@ def generate_2d_points(function, x_range, y_range, density):
     return points
 
 
-def calculate_expected_pixels(expected_angles, angle_of_view, image_size):
+def calculate_expected_pixels(expected_angles, angle_of_view, image_size, std):
     """
     Calculate the expected pixel positions on an image given the expected angles.
 
@@ -93,6 +93,7 @@ def calculate_expected_pixels(expected_angles, angle_of_view, image_size):
                             converted to a list.
     @param angle_of_view: (float) The camera's angle of view in degrees.
     @param image_size: (tuple) The size of the image in pixels (width, height).
+    @param std: (float) The standard deviation of the white Gaussian noise to add to the pixel values.
     @return: (numpy.ndarray) An array containing the expected pixel positions.
 
     Note:
@@ -113,6 +114,6 @@ def calculate_expected_pixels(expected_angles, angle_of_view, image_size):
     for i, angle in enumerate(expected_angles):
         # Convert angle to pixel position
         pixel = round((0.5 - angle/angle_of_view) * (horizontal_pixels_number - 1))
-        expected_pixels[i] = pixel
+        expected_pixels[i] = add_white_gaussian_noise(pixel, std)
 
     return expected_pixels
