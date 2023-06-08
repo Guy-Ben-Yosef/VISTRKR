@@ -92,43 +92,84 @@ def get_error(camera_a_data, camera_b_data, delta, target_position):
     return max(errors)
 
 
-def closest_point_between_two_lines(L1, L2):
+def convert_angles_to_unit_vectors(angles_1, angles_2):
     """
-    Computes the point in 3D space that is closest to two infinite lines.
+    Convert angles to unit vectors.
 
-    Parameters
-    ----------
-    L1 : tuple
-        A tuple of two numpy arrays representing the first line in 3D space:
-        - The first array (shape 3,) represents a point `p1` on the line.
-        - The second array (shape 3,) represents a direction vector `v1` of the line.
-    L2 : tuple
-        A tuple of two numpy arrays representing the second line in 3D space:
-        - The first array (shape 3,) represents a point `p2` on the line.
-        - The second array (shape 3,) represents a direction vector `v2` of the line.
+    Given two sets of angles (azimuth and elevation), this function converts them to unit vectors
+    representing the direction in three-dimensional space.
 
-    Returns
-    -------
-    result : numpy array
-        The coordinates of the point in 3D space that is closest to both lines.
+    Args:
+        @param angles_1: (tuple) A tuple containing the azimuth and elevation angles of the first vector.
+        @param angles_2: (tuple) A tuple containing the azimuth and elevation angles of the second vector.
 
-    Raises
-    ------
-    LinAlgError
-        If the system of linear equations is singular (i.e., the lines are parallel).
+    Returns:
+        @return tuple: A tuple containing the unit vectors corresponding to the given angles.
+            The first element is the unit vector for angles_1, and the second element is the unit vector for angles_2.
     """
-    p1, v1 = (L1[0], L1[1])
-    p2, v2 = (L2[0], L2[1])
-    # Compute the vector connecting the lines
-    v3 = np.cross(v1, v2)
+    azimuth_1, elevation_1 = angles_1
+    azimuth_2, elevation_2 = angles_2
 
-    # Compute the parameter values for the point on line 1 closest to line 2
-    p_vec = np.array([(p2[i] - p1[i]) for i in range(3)])
-    v_mat = np.array([v1, -v2, v3])
-    lambdas = np.dot(p_vec, np.linalg.inv(v_mat.T))
+    # Convert angles from degrees to radians
+    azimuth_1_rad, elevation_1_rad = np.deg2rad(azimuth_1), np.deg2rad(elevation_1)
+    azimuth_2_rad, elevation_2_rad = np.deg2rad(azimuth_2), np.deg2rad(elevation_2)
 
-    # Compute the coordinates of the closest point on line 1
-    return (p1 + lambdas[0] * v1 + p2 + lambdas[1] * v2) / 2
+    # Compute the components of the unit vectors
+    u1 = np.array([np.sin(azimuth_1_rad) * np.cos(elevation_1_rad),
+                   np.cos(azimuth_1_rad) * np.cos(elevation_1_rad),
+                   np.sin(elevation_1_rad)])
+
+    u2 = np.array([np.sin(azimuth_2_rad) * np.cos(elevation_2_rad),
+                   np.cos(azimuth_2_rad) * np.cos(elevation_2_rad),
+                   np.sin(elevation_2_rad)])
+
+    return u1, u2
+
+
+def closest_point_between_lines(line1, line2):
+    """
+    Find the closest point between two lines.
+
+    Given two lines defined by a point and a direction vector, this function calculates
+    the closest point on the first line to the second line.
+
+    Args:
+        @param line1: (tuple) A tuple containing the point and direction vector of the first line.
+            The point is a 3D coordinate, and the direction vector is a 3D vector.
+        @param line2: (tuple) A tuple containing the point and direction vector of the second line.
+            The point is a 3D coordinate, and the direction vector is a 3D vector.
+
+    Returns:
+        @return numpy.ndarray: The 3D coordinates of the closest point on the first line to the second line.
+
+    Raises:
+        @raise LinAlgError: If the system of linear equations is singular (i.e., the lines are parallel).
+    """
+    # Unpack the lines into variables
+    point1, direction1 = line1
+    point2, direction2 = line2
+
+    # Raise LinAlgError if the system of linear equations is singular
+    if np.linalg.norm(direction2 - direction1) < 1e-6:
+        raise np.linalg.LinAlgError("The lines are parallel, or nearly parallel.")
+
+    # Construct the matrix G
+    G = np.zeros([6, 5])
+    G[:3, :3] = np.eye(3)
+    G[3:, :3] = np.eye(3)
+    G[:3, 3] = -direction1
+    G[3:, 4] = -direction2
+
+    # Construct the vector d
+    d = np.concatenate([point1, point2])
+
+    # Calculate the parameters 'm' using least squares
+    m = np.linalg.inv(G.T @ G) @ G.T @ d
+
+    # Extract the coordinates of the closest point
+    closest_point = m[:3]
+
+    return closest_point
 
 
 def weighted_estimation(points, weights):
