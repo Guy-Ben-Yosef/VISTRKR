@@ -108,6 +108,13 @@ def convert_angles_to_unit_vectors(angles_1, angles_2):
         @return tuple: A tuple containing the unit vectors corresponding to the given angles.
             The first element is the unit vector for angles_1, and the second element is the unit vector for angles_2.
     """
+    # Validate input
+    if type(angles_1) != tuple or type(angles_2) != tuple:
+        raise TypeError('Angles must be passed as tuples.')
+    else:
+        if len(angles_1) != 2 or len(angles_2) != 2:
+            raise ValueError('Angles must be passed as tuples of length 2.')
+
     azimuth_1, elevation_1 = angles_1
     azimuth_2, elevation_2 = angles_2
 
