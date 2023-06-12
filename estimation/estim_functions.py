@@ -123,12 +123,12 @@ def convert_angles_to_unit_vectors(angles_1, angles_2):
     azimuth_2_rad, elevation_2_rad = np.deg2rad(azimuth_2), np.deg2rad(elevation_2)
 
     # Compute the components of the unit vectors
-    u1 = np.array([np.sin(azimuth_1_rad) * np.cos(elevation_1_rad),
-                   np.cos(azimuth_1_rad) * np.cos(elevation_1_rad),
+    u1 = np.array([np.cos(azimuth_1_rad) * np.cos(elevation_1_rad),
+                   np.sin(azimuth_1_rad) * np.cos(elevation_1_rad),
                    np.sin(elevation_1_rad)])
 
-    u2 = np.array([np.sin(azimuth_2_rad) * np.cos(elevation_2_rad),
-                   np.cos(azimuth_2_rad) * np.cos(elevation_2_rad),
+    u2 = np.array([np.cos(azimuth_2_rad) * np.cos(elevation_2_rad),
+                   np.sin(azimuth_2_rad) * np.cos(elevation_2_rad),
                    np.sin(elevation_2_rad)])
 
     return u1, u2
@@ -156,6 +156,14 @@ def closest_point_between_lines(line1, line2):
     # Unpack the lines into variables
     point1, direction1 = line1
     point2, direction2 = line2
+
+    # Convert the points to numpy arrays, and add a zero to the end if necessary
+    pre_proc = lambda x: np.array(x) if len(x) == 3 else np.array(list(x) + [0])
+
+    point1 = pre_proc(point1)
+    point2 = pre_proc(point2)
+    direction1 = pre_proc(direction1)
+    direction2 = pre_proc(direction2)
 
     # Raise LinAlgError if the system of linear equations is singular
     if np.linalg.norm(direction2 - direction1) < 1e-6:
