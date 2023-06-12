@@ -5,7 +5,7 @@ This module contains functions for estimating the position of an object using tr
 import numpy as np
 import math
 from calibration.calib_functions import calculate_expected_angles
-
+import deprecation
 
 def tand(x):
     """
@@ -65,6 +65,7 @@ def triangulation_by_pairs(cameras_list, angle_by_camera):
     return result
 
 
+@deprecation.deprecated(details="\nThis function is deprecated. Use calc_3D_error instead.")
 def get_error(camera_a_data, camera_b_data, delta, target_position):
     """
     Computes the maximum error for an estimated position of an object.
@@ -77,8 +78,8 @@ def get_error(camera_a_data, camera_b_data, delta, target_position):
     """
 
     # Expected azimuth angle of cameras A and B in degrees.
-    azimuth_a = calculate_expected_angles(camera_a_data, tuple(target_position))
-    azimuth_b = calculate_expected_angles(camera_b_data, tuple(target_position))
+    azimuth_a = calculate_expected_angles(camera_a_data, tuple(target_position))[0]
+    azimuth_b = calculate_expected_angles(camera_b_data, tuple(target_position))[0]
 
     # Estimate object positions for each combination of expected azimuth angles
     pp = triangulation(camera_a_data, azimuth_a + delta, camera_b_data, azimuth_b + delta)
@@ -87,7 +88,7 @@ def get_error(camera_a_data, camera_b_data, delta, target_position):
     mp = triangulation(camera_a_data, azimuth_a - delta, camera_b_data, azimuth_b + delta)
 
     # Compute error for each estimated position and store in array
-    errors = np.linalg.norm(np.array([pp, mm, pm, mp]) - target_position, axis=1)
+    errors = np.linalg.norm(np.array([pp, mm, pm, mp]) - target_position[:2], axis=1)
 
     return max(errors)
 
