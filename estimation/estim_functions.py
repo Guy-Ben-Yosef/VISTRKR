@@ -26,9 +26,9 @@ def triangulation(camera_a_data, sight_angle_a, camera_b_data, sight_angle_b):
     @return: (numpy.ndarray) An array containing the estimated X and Y coordinates of the object.
     """
     # Rearrange data
-    x_a, y_a = camera_a_data['position']
+    x_a, y_a = camera_a_data['position'][:2]
     az_a = camera_a_data['azimuth']
-    x_b, y_b = camera_b_data['position']
+    x_b, y_b = camera_b_data['position'][:2]
     az_b = camera_b_data['azimuth']
 
     # Calculate the tangent of the azimuth angles
