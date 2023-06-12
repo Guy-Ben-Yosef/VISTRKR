@@ -93,6 +93,64 @@ def get_error(camera_a_data, camera_b_data, delta, target_position):
     return max(errors)
 
 
+def calc_3d_error(camera_a_data, camera_b_data, delta, target_position):
+    """
+    Calculates the maximum 3D error between two cameras and a target position.
+
+    @param camera_a_data: (dict) Data for camera A, including 'azimuth', 'elevation', and 'position'.
+    @param camera_b_data: (dict) Data for camera B, including 'azimuth', 'elevation', and 'position'.
+    @param delta: (float) Delta value for calculating deviations.
+    @param target_position: (tuple) Target position in 3D space as a tuple of (x, y, z) coordinates.
+    @return: (float) Maximum 3D error between the two cameras and the target position.
+    """
+    target_position = tuple(target_position)
+
+    # Calculate the expected azimuth and elevation for camera A based on camera data and target position
+    azimuth_a, elevation_a = calculate_expected_angles(camera_a_data, target_position)
+    azimuth_a += camera_a_data['azimuth']
+    elevation_a += camera_a_data['elevation']
+
+    # Calculate the expected azimuth and elevation for camera B based on camera data and target position
+    azimuth_b, elevation_b = calculate_expected_angles(camera_b_data, target_position)
+    azimuth_b += camera_b_data['azimuth']
+    elevation_b += camera_b_data['elevation']
+
+    deltas = [-delta, delta]
+    combinations = 2 ** 4
+    deviated_points = np.zeros([combinations, 3])
+
+    i = 0
+    for delta_azimuth_a in deltas:
+        for delta_elevation_a in deltas:
+            for delta_azimuth_b in deltas:
+                for delta_elevation_b in deltas:
+                    # Calculate the deviated azimuth and elevation for camera A and camera B
+                    deviated_azimuth_a = azimuth_a + delta_azimuth_a
+                    deviated_elevation_a = elevation_a + delta_elevation_a
+
+                    deviated_azimuth_b = azimuth_b + delta_azimuth_b
+                    deviated_elevation_b = elevation_b + delta_elevation_b
+
+                    angles_a = (deviated_azimuth_a, deviated_elevation_a)
+                    angles_b = (deviated_azimuth_b, deviated_elevation_b)
+
+                    # Convert the deviated angles to unit vectors representing directions
+                    direction_a, direction_b = convert_angles_to_unit_vectors(angles_a, angles_b)
+
+                    line_a = (camera_a_data['position'], direction_a)
+                    line_b = (camera_b_data['position'], direction_b)
+
+                    # Find the closest point between the lines defined by camera A and camera B
+                    deviated_points[i, :] = closest_point_between_lines(line_a, line_b)
+                    i += 1
+
+    # Calculate the errors as the Euclidean distance between each deviated point and the target position
+    errors = np.linalg.norm(deviated_points - target_position, axis=1)
+
+    # Return the maximum error among all deviations
+    return max(errors)
+
+
 def convert_angles_to_unit_vectors(angles_1, angles_2):
     """
     Convert angles to unit vectors.
