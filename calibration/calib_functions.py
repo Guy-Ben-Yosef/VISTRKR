@@ -15,22 +15,36 @@ def calculate_expected_angles(camera_data, points):
     if not isinstance(points, list):
         points = [points]
     # Check that each point in points is a tuple of length 2
-    if any(not isinstance(p, tuple) or len(p) != 2 for p in points):
-        raise TypeError("Each point in points must be a tuple of length 2.")
+    if any(not isinstance(p, tuple) or (len(p) != 2 and len(p) != 3) for p in points):
+        raise TypeError("Each point in points must be a tuple of length 2 or 3.")
 
     camera_position = camera_data['position']
     camera_azimuth = camera_data['azimuth']
+    camera_elevation = camera_data['elevation']
 
-    expected_angles = []
+    expected_azimuths = []
+    expected_elevations = []
     for point in points:
         x = point[0]
         y = point[1]
+        z = 0 if len(point) == 2 else point[2]  # Set z to 0 if it is not provided
         delta_x = x - camera_position[0]  # Calculate the difference in x coordinates
         delta_y = y - camera_position[1]  # Calculate the difference in y coordinates
-        azimuth = np.rad2deg(np.arctan2(delta_y, delta_x)) - camera_azimuth  # Calculate the azimuth angle
-        expected_angles.append(azimuth)
+        delta_z = z - camera_position[2]  # Calculate the difference in z coordinates
 
-    return expected_angles if len(expected_angles) > 1 else expected_angles[0]
+        # Calculate the azimuth angle:
+        azimuth = np.rad2deg(np.arctan2(delta_y, delta_x)) - camera_azimuth
+
+        # Calculate the elevation angle:
+        elevation = np.rad2deg(np.arctan2(delta_z, np.sqrt(delta_x ** 2 + delta_y ** 2))) - camera_elevation
+
+        # Append the calculated angles to the list of expected angles
+        expected_azimuths.append(azimuth)
+        expected_elevations.append(elevation)
+
+    long_return = (expected_azimuths, expected_elevations)
+    short_return = (expected_azimuths[0], expected_elevations[0])
+    return long_return if len(expected_azimuths) > 1 else short_return
 
 
 def calculate_calibration_params(measured_pixels, expected_angles, fit_degree=1):
