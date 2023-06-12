@@ -5,12 +5,13 @@ import numpy as np
 
 def calculate_expected_angles(camera_data, points):
     """
-    Calculates the expected azimuth angles for a set of points relative to a camera position and azimuth angle.
+    Calculates the expected azimuth and elevation angles for a set of points relative to a camera position and
+    orientation.
 
-    @param camera_data: (dict) A dictionary containing the position and azimuth angle in degrees of the camera.
-    @param points: (array-like) A list or array of (x, y) coordinate pairs for the points of interest.
-    @return: (list of floats) A list of expected azimuth angles (in degrees) for the given points relative to the camera
-             position and azimuth angle.
+    @param camera_data: (dict) A dictionary containing the position and orientation in degrees of the camera.
+    @param points: (array-like) A list or array of (x, y, z) coordinates for the points of interest.
+    @return: (list of floats) A list of expected azimuth and elevation angles (in degrees) for the given points relative
+             to the camera position and orientation.
     """
     if not isinstance(points, list):
         points = [points]
