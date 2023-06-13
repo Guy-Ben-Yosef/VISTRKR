@@ -1,5 +1,7 @@
 import numpy as np
 import math
+import os
+import xml.etree.ElementTree as ET
 
 from calibration import calib_functions
 from estimation import estim_functions
@@ -138,6 +140,68 @@ def simulate_calibration(cameras_list, calibration_points, angle_error_std=5, pi
         updated_cameras_data.append(camera)
 
     return updated_cameras_data
+
+
+def write_cameras_data_to_xml(cameras_data_list, filename):
+    """
+    Writes a list of camera dictionaries to an XML file.
+    @param cameras_data_list: (list) List of camera dictionaries, each containing camera parameters
+    @param filename: (string) Name of the XML file to be written
+    """
+    root = ET.Element('cameras_data')
+    root.text = '\n'
+
+    for camera in cameras_data_list:
+        camera_elem = ET.SubElement(root, 'camera')
+        camera_elem.text = '\n    '
+        camera_elem.tail = '\n    '
+
+        camera_name_elem = ET.SubElement(camera_elem, 'camera_name')
+        camera_name_elem.text = camera['name']
+        camera_name_elem.tail = '\n        '
+
+        position_elem = ET.SubElement(camera_elem, 'position')
+        position_elem.text = ','.join(str(coord) for coord in camera['position'])
+        position_elem.tail = '\n        '
+
+        azimuth_elem = ET.SubElement(camera_elem, 'azimuth')
+        azimuth_elem.text = str(camera['azimuth'])
+        azimuth_elem.tail = '\n        '
+
+        elevation_elem = ET.SubElement(camera_elem, 'elevation')
+        elevation_elem.text = str(camera['elevation'])
+        elevation_elem.tail = '\n        '
+
+        angle_of_view_elem = ET.SubElement(camera_elem, 'angle_of_view')
+        angle_of_view_elem.text = str(camera['angle_of_view'])
+        angle_of_view_elem.tail = '\n        '
+
+        resolution_elem = ET.SubElement(camera_elem, 'resolution')
+        resolution_elem.text = ','.join(str(res) for res in camera['resolution'])
+        resolution_elem.tail = '\n        '
+
+        deployed_azimuth_elem = ET.SubElement(camera_elem, 'deployed_azimuth')
+        deployed_azimuth_elem.text = str(camera['deployed_azimuth'])
+        deployed_azimuth_elem.tail = '\n        '
+
+        deployed_elevation_elem = ET.SubElement(camera_elem, 'deployed_elevation')
+        deployed_elevation_elem.text = str(camera['deployed_elevation'])
+        deployed_elevation_elem.tail = '\n        '
+
+        calibration_elem = ET.SubElement(camera_elem, 'calibration')
+        calibration_elem.text = '\n            '
+        calibration_elem.tail = '\n        '
+
+        azimuth_calibration_elem = ET.SubElement(calibration_elem, 'azimuth')
+        azimuth_calibration_elem.text = ','.join(str(val) for val in camera['calibration']['azimuth'])
+        azimuth_calibration_elem.tail = '\n            '
+
+        elevation_calibration_elem = ET.SubElement(calibration_elem, 'elevation')
+        elevation_calibration_elem.text = ','.join(str(val) for val in camera['calibration']['elevation'])
+        elevation_calibration_elem.tail = '\n            '
+
+    tree = ET.ElementTree(root)
+    tree.write(filename, encoding='utf-8', xml_declaration=True)
 
 
 
