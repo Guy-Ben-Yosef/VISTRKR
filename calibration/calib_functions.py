@@ -45,8 +45,8 @@ def calculate_expected_angles(camera_data, points):
         elevation = np.rad2deg(np.arctan2(delta_z, np.sqrt(delta_x ** 2 + delta_y ** 2))) - camera_elevation
 
         # Append the calculated angles to the list of expected angles
-        expected_azimuths.append(azimuth % 360)
-        expected_elevations.append(elevation % 360)
+        expected_azimuths.append(normalize_angle(azimuth))
+        expected_elevations.append(normalize_angle(elevation))
 
     long_return = (expected_azimuths, expected_elevations)
     short_return = (expected_azimuths[0], expected_elevations[0])
