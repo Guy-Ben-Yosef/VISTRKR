@@ -204,6 +204,50 @@ def write_cameras_data_to_xml(cameras_data_list, filename):
     tree.write(filename, encoding='utf-8', xml_declaration=True)
 
 
+def read_cameras_data_from_xml(filename):
+    """
+    Reads camera data from an XML file and returns a list of camera dictionaries.
+    @param filename: (string) Name of the XML file to be read
+    @return: (list) List of camera dictionaries
+    """
+    tree = ET.parse(filename)
+    root = tree.getroot()
+
+    cameras_data_list = []
+
+    for camera_elem in root.findall('camera'):
+        camera_dict = {}
+
+        camera_dict['name'] = camera_elem.find('camera_name').text
+
+        position_text = camera_elem.find('position').text
+        camera_dict['position'] = [float(coord) for coord in position_text.split(',')]
+
+        camera_dict['azimuth'] = float(camera_elem.find('azimuth').text)
+        camera_dict['elevation'] = float(camera_elem.find('elevation').text)
+        camera_dict['angle_of_view'] = float(camera_elem.find('angle_of_view').text)
+
+        resolution_text = camera_elem.find('resolution').text
+        camera_dict['resolution'] = [int(res) for res in resolution_text.split(',')]
+
+        camera_dict['deployed_azimuth'] = float(camera_elem.find('deployed_azimuth').text)
+        camera_dict['deployed_elevation'] = float(camera_elem.find('deployed_elevation').text)
+
+        calibration_dict = {}
+        calibration_elem = camera_elem.find('calibration')
+
+        azimuth_calib_text = calibration_elem.find('azimuth').text
+        calibration_dict['azimuth'] = [float(val) for val in azimuth_calib_text.split(',')]
+
+        elevation_calib_text = calibration_elem.find('elevation').text
+        calibration_dict['elevation'] = [float(val) for val in elevation_calib_text.split(',')]
+
+        camera_dict['calibration'] = calibration_dict
+
+        cameras_data_list.append(camera_dict)
+
+    return cameras_data_list
+
 
 if __name__ == '__main__':
     # Data arrangement
