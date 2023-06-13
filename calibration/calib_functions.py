@@ -3,6 +3,11 @@ import warnings
 import numpy as np
 
 
+def normalize_angle(x):
+    # TODO: docstring, comments
+    return (x + 180) % 360 - 180
+
+
 def calculate_expected_angles(camera_data, points):
     """
     Calculates the expected azimuth and elevation angles for a set of points relative to a camera position and
