@@ -21,18 +21,18 @@ def point2pixel(point, camera_data):
     @param point: (tuple of floats) A tuple containing the (x, y) coordinates of the point.
     @param camera_data: (dict) A dictionary containing the position, azimuth angle in degrees and calibration data of
            the camera.
-    @return: (int) The pixel value representation of the point.
+    @return: (tuple) The pixel values representation of the point.
     """
     camera_position = camera_data['position']
     camera_azimuth = camera_data['azimuth']
+    camera_elevation = camera_data['elevation']
 
-    x, y = point
+    expected_azimuth, expected_elevation = calculate_expected_angles(camera_data, point)
 
-    phi = calculate_expected_angles(camera_data, point)
+    pixel_horizontal = phi2pixel(expected_azimuth, camera_data['calibration']['azimuth'])
+    pixel_vertical = phi2pixel(expected_elevation, camera_data['calibration']['elevation'])
 
-    pixel = phi2pixel(phi, camera_data['calibration'])
-
-    return pixel
+    return pixel_horizontal, pixel_vertical
 
 
 def phi2pixel(phi, calibration_data):
