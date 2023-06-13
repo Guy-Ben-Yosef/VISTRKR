@@ -10,8 +10,15 @@ def add_white_gaussian_noise(pixel, std):
     @param std: (float) The standard deviation of the noise.
     @return: (int) The pixel value with added noise.
     """
-    s = normal(0, std)
-    return int(pixel + s)
+    if isinstance(pixel, int):
+        s = normal(0, std)
+        return int(pixel + s)
+    elif isinstance(pixel, tuple):
+        # TODO: validate tuple of two elements
+        return add_white_gaussian_noise(pixel[0], std), add_white_gaussian_noise(pixel[1], std)
+    else:
+        # TODO: add error
+        return
 
 
 def point2pixel(point, camera_data):
