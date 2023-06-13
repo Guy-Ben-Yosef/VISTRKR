@@ -113,16 +113,28 @@ def simulate_calibration(cameras_list, calibration_points, angle_error_std=5, pi
 
     updated_cameras_data = []
     for camera in cameras_list:
-        expected_angles = calib_functions.calculate_expected_angles(camera, calibration_points)
-        angle_error = np.random.normal(0, angle_error_std)
-        angles_with_deployment_error = (np.array(expected_angles) - angle_error).tolist()
-        camera['true_azimuth'] = camera['azimuth'] + angle_error
+        expected_azimuths, expected_elevations = calib_functions.calculate_expected_angles(camera, calibration_points)
+
+        azimuth_error = np.random.normal(0, angle_error_std)
+        elevation_error = np.random.normal(0, angle_error_std)
+
+        camera['deployed_azimuth'] = camera['azimuth'] + azimuth_error
+        camera['deployed_elevation'] = camera['elevation'] + elevation_error
+
+        azimuths_with_deployment_error = (np.array(expected_azimuths) - azimuth_error).tolist()
+        elevations_with_deployment_error = (np.array(expected_elevations) - elevation_error).tolist()
 
         expected_pixels = sim_functions.calculate_expected_pixels(
-            angles_with_deployment_error, camera['angle_of_view'], camera['resolution'], pixel_error_std)
+            (azimuths_with_deployment_error, elevations_with_deployment_error),
+            camera['angle_of_view'], camera['resolution'], pixel_error_std)
 
-        camera['calibration'] = calib_functions.calculate_calibration_params(expected_pixels, expected_angles)
-        camera['calculated_azimuth'] = camera['azimuth'] + camera['calibration'][1] - camera['angle_of_view']/2
+        camera['calibration'] = {}
+        camera['calibration']['azimuth'] = calib_functions.calculate_calibration_params(
+            expected_pixels[:, 0], expected_azimuths)
+        camera['calibration']['elevation'] = calib_functions.calculate_calibration_params(
+            expected_pixels[:, 1], expected_elevations)
+
+        # camera['calculated_azimuth'] = camera['azimuth'] + camera['calibration'][1] - camera['angle_of_view']/2
         updated_cameras_data.append(camera)
 
     return updated_cameras_data
