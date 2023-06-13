@@ -250,30 +250,14 @@ def read_cameras_data_from_xml(filename):
 
 
 if __name__ == '__main__':
-    # Data arrangement
     from data.general import *
+    calibration_points = [(10, 8, 0), (5, 5, 5*np.sqrt(2)), (10, 12, 10)]
+    cameras_data = simulate_calibration(cameras_data, calibration_points, angle_error_std=10, pixel_error_std=30)
 
-    simulate_calibration(cameras_data, [(1, 10.5), (10, 9.5), (15, 15), (19, 9)], 10)
+    # Get the current path and go to sub-folder named 'data'
+    p = os.path.join(os.getcwd(), 'data', 'cameras_data.xml')
 
-    NUMBER_OF_POINTS = 150
-    ERROR = 30  # pixel white gaussian noise STD
+    # Write the cameras data to an XML file
+    write_cameras_data_to_xml(cameras_data, p)
 
-    foo = lambda x: 0.6 * (x - 5.8) ** 3 + 1.5 * (x - 5.8) ** 2 + -1.1 * x + 13
 
-    # Generate points using the sim_functions module
-    simulated_points = sim_functions.generate_2d_points(foo, x_range=[1, 19], y_range=[1, 19], density=NUMBER_OF_POINTS)
-
-    # Simulate measurements using the cameras_data and generated points
-    measurements = simulate_data(cameras_data, simulated_points, noise_std=ERROR)
-
-    # Estimate the position of the points using cameras_data and measurements
-    estimated_points = estimate_position(cameras_data, measurements)
-
-    # import matplotlib.pyplot as plt
-    # fig, ax = plt.subplots()
-    #
-    # p = np.array(p)
-    #
-    # ax.plot(p[:, 0], p[:, 1], 'bo')
-    # ax.plot(points[:, 0], points[:, 1], 'rx')
-    # plt.show()
