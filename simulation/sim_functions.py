@@ -89,8 +89,8 @@ def calculate_expected_pixels(expected_angles, angle_of_view, image_size, std):
     """
     Calculate the expected pixel positions on an image given the expected angles.
 
-    @param expected_angles: (float or list) The expected angles in degrees. If a single angle is provided, it will be
-                            converted to a list.
+    @param expected_angles: (tuple of floats or lists) The expected angles in degrees. If a single angles is provided,
+                            it will be converted to a lists.
     @param angle_of_view: (float) The camera's angle of view in degrees.
     @param image_size: (tuple) The size of the image in pixels (width, height).
     @param std: (float) The standard deviation of the white Gaussian noise to add to the pixel values.
@@ -101,19 +101,31 @@ def calculate_expected_pixels(expected_angles, angle_of_view, image_size, std):
     horizontal field of view is symmetric around the camera's forward
     direction.
     """
-    # Ensure that expected_angles is a list
-    if not isinstance(expected_angles, list):
-        expected_angles = [expected_angles]
+    # Ensure that the expected angles is lists
+    for k in range(2):
+        if not isinstance(expected_angles[k], list):
+            expected_angles[k] = [expected_angles[k]]
+    expected_azimuths, expected_elevations = expected_angles  # Unpack the expected angles
+    if len(expected_azimuths) != len(expected_elevations):
+        raise ValueError('The number of azimuths and elevations must be equal.')
+
+    n = len(expected_azimuths)
 
     horizontal_pixels_number = image_size[0]
     vertical_pixels_number = image_size[1]
 
-    expected_pixels = np.zeros(len(expected_angles))
+    expected_pixels = np.zeros([n, 2])
 
     # Calculate the expected pixel positions for each angle
-    for i, angle in enumerate(expected_angles):
+    for i in range(n):
+        azimuth = expected_azimuths[i]
+        elevation = expected_elevations[i]
+
         # Convert angle to pixel position
-        pixel = round((0.5 - angle/angle_of_view) * (horizontal_pixels_number - 1))
-        expected_pixels[i] = add_white_gaussian_noise(pixel, std)
+        pixel_horizontal = round((0.5 - azimuth/angle_of_view) * (horizontal_pixels_number - 1))
+        pixel_vertical = round((0.5 - elevation / angle_of_view) * (vertical_pixels_number - 1))
+
+        expected_pixels[i, 0] = add_white_gaussian_noise(pixel_horizontal, std)
+        expected_pixels[i, 1] = add_white_gaussian_noise(pixel_vertical, std)
 
     return expected_pixels
