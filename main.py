@@ -29,28 +29,56 @@ def calibrate_cameras(cameras_list, calibration_data):
 
 
 def estimate_position(cameras_list, pixels_by_camera):
+    """
+    Estimate the position using triangulation based on camera pixels.
+
+    Args:
+        @param: cameras_list (list): A list of dictionaries representing cameras.
+                Each camera dictionary should have keys: 'name', 'calibration'.
+        @param: pixels_by_camera (dict): A dictionary mapping camera names to pixel values.
+                The pixel values can be either a single pixel or a list of pixels.
+
+    Returns:
+        @return: numpy.ndarray: A 2D array representing the estimated positions.
+                 Each row corresponds to a measurement, and the columns represent the X, Y, and Z coordinates.
+    """
+    # Determine the number of measurements
     if not isinstance(pixels_by_camera[cameras_list[0]['name']], list):
         number_of_measurements = 1
     else:
         number_of_measurements = len(pixels_by_camera[cameras_list[0]['name']])
+
     expected_angles = {}
+
+    # Calculate the expected angles for each camera
     for camera in cameras_list:
         expected_angles_for_camera = []
 
-        # TODO: Implement for single point/pixel/measurement as well
+        # Validate that the pixel is iterable
+        if not isinstance(pixels_by_camera[camera['name']], list):
+            pixels_by_camera[camera['name']] = [pixels_by_camera[camera['name']]]
+
         for pixel in pixels_by_camera[camera['name']]:
-            expected_angles_for_camera.append(calib_functions.pixel2phi(camera, pixel))
+            expected_angles_for_camera.append(calib_functions.pixel2phi(camera['calibration'], pixel))
+
         expected_angles[camera['name']] = expected_angles_for_camera
 
-    dimensions = 2
-    points_weights_by_pairs = np.zeros([math.comb(len(cameras_list), 2), dimensions+1, number_of_measurements])
+    pixel_dim = len(pixels_by_camera[camera['name']][0])
+    dimensions = pixel_dim + 1  # Recall that a 2D image represents 3D space
+
+    # Initialize the array to store points and weights for each pair of cameras
+    points_weights_by_pairs = np.zeros([math.comb(len(cameras_list), 2), dimensions + 1, number_of_measurements])
+
+    # Perform triangulation for each measurement
     for k in range(number_of_measurements):
         angle_by_camera = {}
         for m in range(len(cameras_list)):
             camera_name = cameras_list[m]['name']
             angle_by_camera[camera_name] = expected_angles[camera_name][k]
+
         points_weights_by_pairs[:, :, k] = estim_functions.triangulation_by_pairs(cameras_list, angle_by_camera)
 
+    # Perform weighted estimation for each measurement
     results = np.zeros([number_of_measurements, dimensions])
     for k in range(number_of_measurements):
         relevant_points = points_weights_by_pairs[:, :dimensions, k]
