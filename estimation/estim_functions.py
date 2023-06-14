@@ -16,6 +16,7 @@ def tand(x):
     return np.tan(np.deg2rad(x))
 
 
+@deprecation.deprecated(details="\nThis function is deprecated. Use closest_point_between_lines instead.")
 def triangulation(camera_a_data, sight_angle_a, camera_b_data, sight_angle_b):
     """
     Computes the estimated X and Y coordinates of an object using triangulation method.
@@ -42,26 +43,66 @@ def triangulation(camera_a_data, sight_angle_a, camera_b_data, sight_angle_b):
 
 
 def triangulation_by_pairs(cameras_list, angle_by_camera):
-    result = np.zeros([math.comb(len(cameras_list), 2), 3])
+    """
+    Perform triangulation by pairs of cameras.
+
+    Args:
+        @param: cameras_list (list): A list of dictionaries representing cameras.
+                Each camera dictionary should have keys: 'name', 'azimuth', 'elevation', and 'position'.
+        @param: angle_by_camera (dict): A dictionary mapping camera names to angles.
+                The angles can be either an integer or a tuple of two elements representing azimuth and elevation.
+
+    Returns:
+        @return: numpy.ndarray: A 2D array representing the triangulated points.
+                 Each row corresponds to a pair of cameras, and the columns represent the X, Y, and Z coordinates.
+                 The last column stores the calculated 3D error for each pair of cameras.
+    """
+    # Determine the dimensions based on the type of angle values
+    instance_val = list(angle_by_camera.values())[0]
+    if isinstance(instance_val, int):
+        dimensions = 2
+    elif isinstance(instance_val, tuple) and len(instance_val) == 2:
+        dimensions = 3
+    else:
+        raise TypeError("angle_by_camera values must be either int or tuple of two elements")
+
+    # Initialize the result array with zeros
+    result = np.zeros([math.comb(len(cameras_list), 2), dimensions + 1])
     running_index = 0
+
+    # Perform triangulation for each pair of cameras
     for i in range(len(cameras_list) - 1):
         for j in range(i + 1, len(cameras_list)):
             camera_a = cameras_list[i]
+            azimuth_a = angle_by_camera[camera_a['name']][0] + camera_a['azimuth']
+            elevation_a = angle_by_camera[camera_a['name']][1] + camera_a['elevation']
+
             camera_b = cameras_list[j]
-            sight_angle_a = angle_by_camera[camera_a['name']]
-            sight_angle_b = angle_by_camera[camera_b['name']]
-            point = triangulation(camera_a, sight_angle_a, camera_b, sight_angle_b)
-            result[running_index, :2] = point
+            azimuth_b = angle_by_camera[camera_b['name']][0] + camera_b['azimuth']
+            elevation_b = angle_by_camera[camera_b['name']][1] + camera_b['elevation']
+
+            direction_a, direction_b = convert_angles_to_unit_vectors((azimuth_a, elevation_a),
+                                                                      (azimuth_b, elevation_b))
+
+            point = closest_point_between_lines((camera_a['position'], direction_a),
+                                                (camera_b['position'], direction_b))
+
+            result[running_index, :dimensions] = point
             running_index += 1
-    point = np.mean(result[:, :2], axis=0)
+
+    # Calculate the mean point
+    point = np.mean(result[:, :dimensions], axis=0)
 
     running_index = 0
+
+    # Calculate the 3D error for each pair of cameras
     for i in range(len(cameras_list) - 1):
         for j in range(i + 1, len(cameras_list)):
             camera_a = cameras_list[i]
             camera_b = cameras_list[j]
-            result[running_index, 2] = get_error(camera_a, camera_b, delta=0.5, target_position=point)
+            result[running_index, dimensions] = calc_3d_error(camera_a, camera_b, delta=0.5, target_position=point)
             running_index += 1
+
     return result
 
 
