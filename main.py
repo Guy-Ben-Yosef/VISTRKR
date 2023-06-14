@@ -135,8 +135,8 @@ def simulate_calibration(cameras_list, calibration_points, angle_error_std=5, pi
     if not isinstance(cameras_list, list):
         cameras_list = [cameras_list]
     # Ensure that `calibration_points` is a list, if not raise an error
-    if not isinstance(calibration_points, list):
-        raise TypeError('`calibration_points` must be a list of points.')
+    if not (isinstance(calibration_points, list) or isinstance(calibration_points, np.ndarray)):
+        raise TypeError('`calibration_points` must be an array of points.')
     # Ensure that `calibration_points` contains at least 3 points
     if len(calibration_points) < 3:
         raise ValueError('At least 3 calibration points are required.')
@@ -181,52 +181,52 @@ def write_cameras_data_to_xml(cameras_data_list, filename):
 
     for camera in cameras_data_list:
         camera_elem = ET.SubElement(root, 'camera')
-        camera_elem.text = '\n    '
-        camera_elem.tail = '\n    '
+        camera_elem.text = '\n\t'
+        camera_elem.tail = '\n\t'
 
-        camera_name_elem = ET.SubElement(camera_elem, 'camera_name')
-        camera_name_elem.text = camera['name']
-        camera_name_elem.tail = '\n        '
+        id = ET.SubElement(camera_elem, 'ID')
+        id.text = camera['name']
+        id.tail = '\n\t\t'
 
         position_elem = ET.SubElement(camera_elem, 'position')
         position_elem.text = ','.join(str(coord) for coord in camera['position'])
-        position_elem.tail = '\n        '
+        position_elem.tail = '\n\t\t'
 
         azimuth_elem = ET.SubElement(camera_elem, 'azimuth')
         azimuth_elem.text = str(camera['azimuth'])
-        azimuth_elem.tail = '\n        '
+        azimuth_elem.tail = '\n\t\t'
 
         elevation_elem = ET.SubElement(camera_elem, 'elevation')
         elevation_elem.text = str(camera['elevation'])
-        elevation_elem.tail = '\n        '
+        elevation_elem.tail = '\n\t\t'
 
         angle_of_view_elem = ET.SubElement(camera_elem, 'angle_of_view')
         angle_of_view_elem.text = str(camera['angle_of_view'])
-        angle_of_view_elem.tail = '\n        '
+        angle_of_view_elem.tail = '\n\t\t'
 
         resolution_elem = ET.SubElement(camera_elem, 'resolution')
         resolution_elem.text = ','.join(str(res) for res in camera['resolution'])
-        resolution_elem.tail = '\n        '
+        resolution_elem.tail = '\n\t\t'
 
         deployed_azimuth_elem = ET.SubElement(camera_elem, 'deployed_azimuth')
         deployed_azimuth_elem.text = str(camera['deployed_azimuth'])
-        deployed_azimuth_elem.tail = '\n        '
+        deployed_azimuth_elem.tail = '\n\t\t'
 
         deployed_elevation_elem = ET.SubElement(camera_elem, 'deployed_elevation')
         deployed_elevation_elem.text = str(camera['deployed_elevation'])
-        deployed_elevation_elem.tail = '\n        '
+        deployed_elevation_elem.tail = '\n\t\t'
 
         calibration_elem = ET.SubElement(camera_elem, 'calibration')
-        calibration_elem.text = '\n            '
-        calibration_elem.tail = '\n        '
+        calibration_elem.text = '\n\t\t\t'
+        calibration_elem.tail = '\n\t\t'
 
         azimuth_calibration_elem = ET.SubElement(calibration_elem, 'azimuth')
         azimuth_calibration_elem.text = ','.join(str(val) for val in camera['calibration']['azimuth'])
-        azimuth_calibration_elem.tail = '\n            '
+        azimuth_calibration_elem.tail = '\n\t\t\t'
 
         elevation_calibration_elem = ET.SubElement(calibration_elem, 'elevation')
         elevation_calibration_elem.text = ','.join(str(val) for val in camera['calibration']['elevation'])
-        elevation_calibration_elem.tail = '\n            '
+        elevation_calibration_elem.tail = '\n\t\t\t'
 
     tree = ET.ElementTree(root)
     tree.write(filename, encoding='utf-8', xml_declaration=True)
@@ -279,7 +279,7 @@ def read_cameras_data_from_xml(filename):
 
 if __name__ == '__main__':
     from data.general import *
-    calibration_points = [(10, 8, 0), (5, 5, 5*np.sqrt(2)), (10, 12, 10)]
+    # calibration_points = [(10, 8, 0), (5, 5, 5*np.sqrt(2)), (10, 12, 10)]
     cameras_data = simulate_calibration(cameras_data, calibration_points, angle_error_std=10, pixel_error_std=30)
 
     # Get the current path and go to sub-folder named 'data'
@@ -288,4 +288,27 @@ if __name__ == '__main__':
     # Write the cameras data to an XML file
     write_cameras_data_to_xml(cameras_data, p)
 
+    N = 60
+    rounds = 2
+    max_z = 5
+    t = np.linspace(0, rounds * 2 * np.pi, N)
+    x = np.cos(t)
+    y = np.sin(t)
+    z = np.linspace(0, max_z, N)
+    points = np.stack((x, y, z), axis=1)
+    points_as_list = []
+    for i in range(points.shape[0]):
+        points_as_list.append(tuple(points[i, :]))
+    measurements_by_camera = simulate_data(cameras_data, points_as_list, noise_std=20)
+    ps = estimate_position(cameras_data, measurements_by_camera)
 
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    for point in points_as_list:
+        ax.scatter(point[0], point[1], point[2], marker='*', c='b')
+    for point in ps:
+        ax.scatter(point[0], point[1], point[2], marker='s', c='r')
+
+    fig.show()
