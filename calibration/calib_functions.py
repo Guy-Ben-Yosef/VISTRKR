@@ -4,7 +4,11 @@ import numpy as np
 
 
 def normalize_angle(x):
-    # TODO: docstring, comments
+    """
+    Normalizes an angle to the range [-180, 180).
+    @param x: Angle in degrees
+    @return: Normalized angle in degrees
+    """
     return (x + 180) % 360 - 180
 
 
