@@ -13,12 +13,10 @@ def add_white_gaussian_noise(pixel, std):
     if isinstance(pixel, int):
         s = normal(0, std)
         return int(pixel + s)
-    elif isinstance(pixel, tuple):
-        # TODO: validate tuple of two elements
+    elif isinstance(pixel, tuple) and len(pixel) == 2:
         return add_white_gaussian_noise(pixel[0], std), add_white_gaussian_noise(pixel[1], std)
-    else:
-        # TODO: add error
-        return
+    else: # Raise an error if the pixel is not an integer or tuple of length 2
+        raise TypeError("pixel must be an integer or tuple of length 2.")
 
 
 def point2pixel(point, camera_data):
