@@ -92,19 +92,25 @@ def calculate_calibration_params(measured_pixels, expected_angles, fit_degree=1)
     return slope, intercept, r_squared
 
 
-def pixel2phi(camera_data, pixel):
+def pixel2phi(calibration_data, pixel):
     """
-    Converts a pixel coordinate to a corresponding angle in degrees, using calibration parameters of a camera.
+    Converts a pixel coordinate to a corresponding angles in degrees, using calibration parameters of a camera.
 
-    @param camera_data: (dict) Dictionary containing camera calibration parameters, including slope and intercept.
-    @param pixel: (float) Pixel coordinate to be converted to an angle.
-    @return: Angle in radians corresponding to the input pixel coordinate, using the slope and intercept calibration
-             parameters of the camera.
+    @param calibration_data: (tuple or dictionary) A tuple containing the slope, intercept, and R^2 value of the or a
+                             dictionary containing the azimuth and elevation calibration parameters of the camera.
+    @param pixel: (int or tuple of 2 ints) The pixel coordinate to convert to an angle.
+    @return: Angle or angles in degrees corresponding to the given pixel coordinate.
     """
-    # Extract the calibration parameters for the camera
-    slope, intercept, _ = camera_data['calibration']
+    if isinstance(pixel, int):
+        # Extract the calibration parameters for the camera
+        slope, intercept, _ = calibration_data
 
-    # Convert the pixel coordinate to an angle using the slope and intercept
-    phi = slope * pixel + intercept
+        # Convert the pixel coordinate to an angle using the slope and intercept
+        phi = slope * pixel + intercept
 
-    return phi
+        return phi
+    elif isinstance(pixel, tuple) and len(pixel) == 2:
+        return pixel2phi(calibration_data['azimuth'], pixel[0]), pixel2phi(calibration_data['elevation'], pixel[1])
+    else:
+        raise TypeError("pixel must be an integer or tuple of length 2.")
+
