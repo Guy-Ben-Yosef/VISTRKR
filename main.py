@@ -148,8 +148,8 @@ def simulate_calibration(cameras_list, calibration_points, angle_error_std=5, pi
         azimuth_error = np.random.normal(0, angle_error_std)
         elevation_error = np.random.normal(0, angle_error_std)
 
-        camera['deployed_azimuth'] = camera['azimuth'] + azimuth_error
-        camera['deployed_elevation'] = camera['elevation'] + elevation_error
+        camera['simulated_azimuth'] = camera['azimuth'] + azimuth_error
+        camera['simulated_elevation'] = camera['elevation'] + elevation_error
 
         azimuths_with_deployment_error = (np.array(expected_azimuths) - azimuth_error).tolist()
         elevations_with_deployment_error = (np.array(expected_elevations) - elevation_error).tolist()
@@ -164,7 +164,11 @@ def simulate_calibration(cameras_list, calibration_points, angle_error_std=5, pi
         camera['calibration']['elevation'] = calib_functions.calculate_calibration_params(
             expected_pixels[:, 1], expected_elevations)
 
-        # camera['calculated_azimuth'] = camera['azimuth'] + camera['calibration'][1] - camera['angle_of_view']/2
+        camera['calculated_azimuth'] = camera['azimuth'] + \
+                                       camera['calibration']['azimuth'][1] - camera['angle_of_view'] / 2
+        camera['calculated_elevation'] = camera['elevation'] + \
+                                         camera['calibration']['elevation'][1] - camera['angle_of_view'] / 2
+
         updated_cameras_data.append(camera)
 
     return updated_cameras_data
