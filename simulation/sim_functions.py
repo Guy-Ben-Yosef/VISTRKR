@@ -13,12 +13,10 @@ def add_white_gaussian_noise(pixel, std):
     if isinstance(pixel, int):
         s = normal(0, std)
         return int(pixel + s)
-    elif isinstance(pixel, tuple):
-        # TODO: validate tuple of two elements
+    elif isinstance(pixel, tuple) and len(pixel) == 2:
         return add_white_gaussian_noise(pixel[0], std), add_white_gaussian_noise(pixel[1], std)
-    else:
-        # TODO: add error
-        return
+    else: # Raise an error if the pixel is not an integer or tuple of length 2
+        raise TypeError("pixel must be an integer or tuple of length 2.")
 
 
 def point2pixel(point, camera_data):
@@ -57,15 +55,16 @@ def phi2pixel(phi, calibration_data):
     return pixel
 
 
-def generate_2d_points(function, x_range, y_range, density):
+def generate_3d_points(function, x_range, y_range, z_range, density):
     """
-    Generate a list of 2D points on a plane using a given function.
+    Generate a list of 3D points on a space using a given function.
 
     @param function: (callable) The function f(x) that defines the y-coordinate of the points.
                                 It should take a NumPy array of x-values as input and return
                                 a NumPy array of corresponding y-values.
     @param x_range: (tuple) The range of x-values (x_min, x_max) for generating points.
     @param y_range: (tuple) The range of y-values (y_min, y_max) to filter the points.
+    @param z_range: (tuple) The range of z-values (z_min, z_max) for generating points.
     @param density: (int) The number of points to generate between x_min and x_max.
     @return: (list) A list of generated points as tuples (x, y).
     """
@@ -75,19 +74,22 @@ def generate_2d_points(function, x_range, y_range, density):
     # Evaluate the function at each x-coordinate to get the y-coordinates
     y_values = function(x_values)
 
+    z_values = np.linspace(z_range[0], z_range[1], density)
+
     # Create a mask to filter out points outside the y-range
     mask = (y_range[0] <= y_values) & (y_values <= y_range[1])
 
     # Filter the x and y values based on the mask
     x_filtered = x_values[mask]
     y_filtered = y_values[mask]
+    z_filtered = z_values[mask]
 
     # Create a list to store the generated points
     points = []
 
     # Iterate over the filtered values and add them as tuples to the points list
     for i in range(len(x_filtered)):
-        points.append((x_filtered[i], y_filtered[i]))
+        points.append((x_filtered[i], y_filtered[i], z_filtered[i]))
 
     return points
 
