@@ -138,3 +138,23 @@ def calculate_expected_pixels(expected_angles, angle_of_view, image_size, std):
         expected_pixels[i, 1] = add_white_gaussian_noise(pixel_vertical, std)
 
     return expected_pixels
+
+
+def generate_calibration_points(x_limits, y_limits, z_limits, number_of_points):
+    """
+    Generate a list of 3D points on a space using a given function.
+    @param x_limits: (list or tuple) The range of x-values (x_min, x_max) for generating points.
+    @param y_limits: (list or tuple) The range of y-values (y_min, y_max) for generating points.
+    @param z_limits: (list or tuple) The range of z-values (z_min, z_max) for generating points.
+    @param number_of_points: (int) The number of points to generate between x_min and x_max.
+    @return: (list of tuples) A list of generated points as tuples (x, y, z).
+    """
+    random_x_values = np.random.uniform(x_limits[0], x_limits[1], number_of_points)
+    random_y_values = np.random.uniform(y_limits[0], y_limits[1], number_of_points)
+    random_z_values = np.random.uniform(z_limits[0], z_limits[1], number_of_points)
+
+    result = []
+    for i in range(number_of_points):
+        result.append((random_x_values[i], random_y_values[i], random_z_values[i]))
+
+    return result
