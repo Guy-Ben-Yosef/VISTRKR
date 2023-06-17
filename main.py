@@ -212,25 +212,29 @@ def write_cameras_data_to_xml(cameras_data_list, filename):
         resolution_elem.text = ','.join(str(res) for res in camera['resolution'])
         resolution_elem.tail = '\n\t\t'
 
-        deployed_azimuth_elem = ET.SubElement(camera_elem, 'deployed_azimuth')
-        deployed_azimuth_elem.text = str(camera['deployed_azimuth'])
-        deployed_azimuth_elem.tail = '\n\t\t'
+        # Save simulated azimuth and elevation only if they exist
+        if 'simulated_azimuth' in camera:
+            simulated_azimuth_elem = ET.SubElement(camera_elem, 'simulated_azimuth')
+            simulated_azimuth_elem.text = str(camera['simulated_azimuth'])
+            simulated_azimuth_elem.tail = '\n\t\t'
+        if 'simulated_elevation' in camera:
+            simulated_elevation_elem = ET.SubElement(camera_elem, 'simulated_elevation')
+            simulated_elevation_elem.text = str(camera['simulated_elevation'])
+            simulated_elevation_elem.tail = '\n\t\t'
 
-        deployed_elevation_elem = ET.SubElement(camera_elem, 'deployed_elevation')
-        deployed_elevation_elem.text = str(camera['deployed_elevation'])
-        deployed_elevation_elem.tail = '\n\t\t'
+        # Save calibration parameters only if they exist
+        if 'calibration' in camera:
+            calibration_elem = ET.SubElement(camera_elem, 'calibration')
+            calibration_elem.text = '\n\t\t\t'
+            calibration_elem.tail = '\n\t\t'
 
-        calibration_elem = ET.SubElement(camera_elem, 'calibration')
-        calibration_elem.text = '\n\t\t\t'
-        calibration_elem.tail = '\n\t\t'
+            azimuth_calibration_elem = ET.SubElement(calibration_elem, 'azimuth')
+            azimuth_calibration_elem.text = ','.join(str(val) for val in camera['calibration']['azimuth'])
+            azimuth_calibration_elem.tail = '\n\t\t\t'
 
-        azimuth_calibration_elem = ET.SubElement(calibration_elem, 'azimuth')
-        azimuth_calibration_elem.text = ','.join(str(val) for val in camera['calibration']['azimuth'])
-        azimuth_calibration_elem.tail = '\n\t\t\t'
-
-        elevation_calibration_elem = ET.SubElement(calibration_elem, 'elevation')
-        elevation_calibration_elem.text = ','.join(str(val) for val in camera['calibration']['elevation'])
-        elevation_calibration_elem.tail = '\n\t\t\t'
+            elevation_calibration_elem = ET.SubElement(calibration_elem, 'elevation')
+            elevation_calibration_elem.text = ','.join(str(val) for val in camera['calibration']['elevation'])
+            elevation_calibration_elem.tail = '\n\t\t\t'
 
     tree = ET.ElementTree(root)
     tree.write(filename, encoding='utf-8', xml_declaration=True)
@@ -250,31 +254,35 @@ def read_cameras_data_from_xml(filename):
     for camera_elem in root.findall('camera'):
         camera_dict = {}
 
-        camera_dict['name'] = camera_elem.find('camera_name').text
+        camera_dict['name'] = camera_elem.find('ID').text
 
         position_text = camera_elem.find('position').text
-        camera_dict['position'] = [float(coord) for coord in position_text.split(',')]
+        camera_dict['position'] = tuple([float(coord) for coord in position_text.split(',')])
 
         camera_dict['azimuth'] = float(camera_elem.find('azimuth').text)
         camera_dict['elevation'] = float(camera_elem.find('elevation').text)
         camera_dict['angle_of_view'] = float(camera_elem.find('angle_of_view').text)
 
         resolution_text = camera_elem.find('resolution').text
-        camera_dict['resolution'] = [int(res) for res in resolution_text.split(',')]
+        camera_dict['resolution'] = tuple([int(res) for res in resolution_text.split(',')])
 
-        camera_dict['deployed_azimuth'] = float(camera_elem.find('deployed_azimuth').text)
-        camera_dict['deployed_elevation'] = float(camera_elem.find('deployed_elevation').text)
+        # Read simulated azimuth and elevation only if they exist
+        if camera_elem.find('simulated_azimuth') is not None and camera_elem.find('simulated_elevation') is not None:
+            camera_dict['simulated_azimuth'] = float(camera_elem.find('simulated_azimuth').text)
+            camera_dict['simulated_elevation'] = float(camera_elem.find('simulated_elevation').text)
 
-        calibration_dict = {}
-        calibration_elem = camera_elem.find('calibration')
+        # Read calibration parameters only if they exist
+        if camera_elem.find('calibration') is not None:
+            calibration_dict = {}
+            calibration_elem = camera_elem.find('calibration')
 
-        azimuth_calib_text = calibration_elem.find('azimuth').text
-        calibration_dict['azimuth'] = [float(val) for val in azimuth_calib_text.split(',')]
+            azimuth_calib_text = calibration_elem.find('azimuth').text
+            calibration_dict['azimuth'] = [float(val) for val in azimuth_calib_text.split(',')]
 
-        elevation_calib_text = calibration_elem.find('elevation').text
-        calibration_dict['elevation'] = [float(val) for val in elevation_calib_text.split(',')]
+            elevation_calib_text = calibration_elem.find('elevation').text
+            calibration_dict['elevation'] = [float(val) for val in elevation_calib_text.split(',')]
 
-        camera_dict['calibration'] = calibration_dict
+            camera_dict['calibration'] = calibration_dict
 
         cameras_data_list.append(camera_dict)
 
