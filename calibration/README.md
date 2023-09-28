@@ -1,7 +1,7 @@
 # Calibration Algorithm of a Single Camera
 
 <p align="center">
-  <img src="https://github.com/theguyben/VISTRKR/assets/64026118/08642094-e6b2-4802-8a24-e8f62201b5f7" />
+  <img src="https://raw.githubusercontent.com/Guy-Ben-Yosef/VISTRKR/master/calibration/VISTRKR_algs_calibration.png" />
 </p>
 
 ---
