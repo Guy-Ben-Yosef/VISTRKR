@@ -1,5 +1,6 @@
 from calibration.calib_functions import *
 from numpy.random import normal
+import time
 
 
 def add_white_gaussian_noise(pixel, std):
@@ -158,3 +159,35 @@ def generate_calibration_points(x_limits, y_limits, z_limits, number_of_points):
         result.append((random_x_values[i], random_y_values[i], random_z_values[i]))
 
     return result
+
+def simulate_detection_timestamps(locations, start_timestamp, frequency, time_variation_std, output_file):
+    """
+    Simulates the transmission of drone detection data with timestamped events.
+
+    Parameters:
+    locations (list of tuples): A list of tuples where each tuple represents the (x, y) pixel coordinates of a detected drone.
+                                Example: [(3535, 1766), (3560, 1684), ...]
+    start_timestamp (str): The starting timestamp of the first detection in "YYYY/MM/DD-HH:MM" format (e.g., "2025/02/25-17:01").
+                            This will be the timestamp for the first detection event, and subsequent detections will be spaced
+                            by the specified frequency with added time variation.
+    frequency (int): The time interval (in seconds) between consecutive detections.
+                     For example, a value of 5 means detections will occur every 5 seconds, on average.
+    time_variation_std (float): The standard deviation of the time variation in seconds to be added to each detection.
+                                The time variation is drawn from a normal distribution with a mean of 0.
+    output_file (str): The file path where the generated detection data will be written.
+                       Each line in the file will represent one detection event in the format:
+                       "unix_timestamp,x_coordinate,y_coordinate"
+
+    Example usage:
+    simulate_detection_timestamps([(3535, 1766), (3560, 1684)], "16:45", 5, 0.5, "detections.txt")
+    """
+    # Convert start_time to a datetime object
+    start_time_obj = time.strptime(start_timestamp, r"%Y/%m/%d-%H:%M")
+    start_timestamp_unix = time.mktime(start_time_obj)
+    
+    with open(output_file, "w") as file:
+        for location in locations:
+            time_variation = normal(0, time_variation_std)
+            current_timestamp = start_timestamp_unix + frequency + time_variation
+            file.write(f"{current_timestamp:.6f},{location[0]},{location[1]}\n")
+            start_timestamp = current_timestamp
