@@ -185,9 +185,9 @@ def simulate_detection_timestamps(locations, start_timestamp, frequency, time_va
     start_time_obj = time.strptime(start_timestamp, r"%Y/%m/%d-%H:%M")
     start_timestamp_unix = time.mktime(start_time_obj)
     
+    current_timestamp = start_timestamp_unix
     with open(output_file, "w") as file:
         for location in locations:
             time_variation = normal(0, time_variation_std)
-            current_timestamp = start_timestamp_unix + frequency + time_variation
+            current_timestamp += (frequency + time_variation)
             file.write(f"{current_timestamp:.6f},{location[0]},{location[1]}\n")
-            start_timestamp = current_timestamp
