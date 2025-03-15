@@ -175,11 +175,26 @@ def simulate_calibration(cameras_list, calibration_points, angle_error_std=5, pi
 
 
 def simulate_detection_by_camera(measurements, start_timestamp, freq, time_var, output_file_path):
+    """
+    Simulates drone detection timestamps for each camera and writes the results to separate CSV files.
+
+    This function takes a dictionary of drone detection measurements by camera and generates simulated 
+    timestamps for each detection event. The data is written to CSV files, one for each camera, under
+    the specified output directory.
+
+    Parameters:
+    measurements (dict): A dictionary where the keys are camera identifiers (e.g., 'Y1', 'Y2') and the values
+                         are lists of tuples representing the (x, y) pixel coordinates of detected drones for each camera.
+    start_timestamp (str): The starting timestamp for the first detection event in "YYYY/MM/DD-HH:MM" format.
+    freq (int): The time interval (in seconds) between consecutive detections.
+    time_var (float): The standard deviation (in seconds) of the time variation to be added to each detection.
+    output_file_path (str): The directory where the detection CSV files will be written.
+                            The function creates a subdirectory 'detections' within this path, where each camera's
+    """
     os.mkdir(os.path.join(output_file_path, 'detections'))
     for camera, measurements in measurements.items():
         sim_functions.simulate_detection_timestamps(
             measurements, start_timestamp, freq, time_var, os.path.join(output_file_path, 'detections', f'detection_{camera}.csv'))
-
 
 
 def write_cameras_data_to_xml(cameras_data_list, filename):
