@@ -191,7 +191,7 @@ def simulate_detection_by_camera(measurements, start_timestamp, freq, time_var, 
     output_file_path (str): The directory where the detection CSV files will be written.
                             The function creates a subdirectory 'detections' within this path, where each camera's
     """
-    os.mkdir(os.path.join(output_file_path, 'detections'))
+    os.makedirs(os.path.join(output_file_path, 'detections'), exist_ok=True)
     for camera, measurements in measurements.items():
         sim_functions.simulate_detection_timestamps(
             measurements, start_timestamp, freq, time_var, os.path.join(output_file_path, 'detections', f'detection_{camera}.csv'))
@@ -337,7 +337,7 @@ if __name__ == '__main__':
     measurements_by_camera = simulate_data(cameras_data, points_as_list, noise_std=20)
     
     simulate_detection_by_camera(
-        measurements_by_camera, "2025/02/25-17:31", 
+        measurements_by_camera, "2025/03/17-21:41", 
         freq=1, time_var=0.05, output_file_path='data')
 
     ps = estimate_position(cameras_data, measurements_by_camera)
