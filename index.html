@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sky Guardian Eye Drone Tracking</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .panel {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            flex: 1;
+            min-width: 300px;
+        }
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        .camera {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        .camera::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 10px 15px 10px;
+            border-color: transparent transparent pink transparent;
+            transform: rotate(var(--rotation));
+            transform-origin: center;
+            left: 0;
+            top: -5px;
+        }
+        .camera-label {
+            position: absolute;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+            white-space: nowrap;
+            transform: translate(-50%, -100%);
+            margin-top: -5px;
+        }
+        .drone {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background-color: limegreen;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            box-shadow: 0 0 0 3px rgba(0, 255, 0, 0.3);
+        }
+        .trajectory {
+            position: absolute;
+            border: 2px solid blue;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            opacity: 0.5;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .data-table th, .data-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .data-table th {
+            background-color: #f2f2f2;
+        }
+        .status-line {
+            color: #666;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        #controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .coords-display {
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .axis-label {
+            position: absolute;
+            font-size: 12px;
+            color: #333;
+        }
+        #x-axis-label {
+            bottom: 5px;
+            right: 10px;
+        }
+        #y-axis-label {
+            top: 10px;
+            left: 5px;
+            transform: rotate(-90deg);
+            transform-origin: left top;
+        }
+        .grid-line {
+            position: absolute;
+            background-color: rgba(0,0,0,0.1);
+            z-index: 1;
+        }
+        .grid-label {
+            position: absolute;
+            font-size: 10px;
+            color: #666;
+            z-index: 2;
+        }
+
+        .status-indicators {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    }
+
+    .indicator {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .led {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #ccc;
+        display: inline-block;
+        border: 3px solid rgba(0,0,0,0.15);
+    }
+
+    .led.green {
+        background-color: #90EE90; /* Light green */
+        box-shadow: 0 0 12px #90EE90;
+    }
+
+    .led.red {
+        background-color: #FF0000; /* Bright red */
+        box-shadow: 0 0 20px #FF0000;
+    }
+
+    .led.blinking {
+        animation: blink-bold 0.7s infinite;
+    }
+
+    @keyframes blink-bold {
+        0% { 
+            opacity: 1; 
+            box-shadow: 0 0 25px #FF0000, 0 0 10px #FF0000; 
+            transform: scale(1.1);
+        }
+        50% { 
+            opacity: 0.7; 
+            box-shadow: 0 0 15px #FF0000; 
+            transform: scale(1);
+        }
+        100% { 
+            opacity: 1; 
+            box-shadow: 0 0 25px #FF0000, 0 0 10px #FF0000; 
+            transform: scale(1.1);
+        }
+    }
+
+    /* Make text bolder for drone detected */
+    #detectionLed.red + span {
+        color: #d32f2f;
+        font-weight: 900; /* Extra bold */
+        text-shadow: 0 0 1px rgba(0,0,0,0.3);
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sky Guardian Eye Drone Tracking</h1>
+        
+        <div class="dashboard">
+            <div class="panel" style="flex: 2;">
+                <h2>Drone Position (Top View)</h2>
+                <div class="status-line">
+                    Status: <span id="status">Waiting for data...</span> | 
+                    Last update: <span id="lastUpdate">Never</span> | 
+                    Active cameras: <span id="activeCameras">0</span>
+                </div>
+                <div class="status-indicators">
+                    <div class="indicator">
+                        <div id="noDetectionLed" class="led green"></div>
+                        <span>No Drone Detected</span>
+                    </div>
+                    <div class="indicator">
+                        <div id="detectionLed" class="led" style="background-color: #ccc;"></div>
+                        <span>Drone Detected</span>
+                    </div>
+                </div>
+                <div class="map-container">
+                    <div id="map">
+                        <!-- Grid lines will be added by JavaScript -->
+                        <!-- Cameras and drone will be added by JavaScript -->
+                        <div id="x-axis-label" class="axis-label">X-axis (meters)</div>
+                        <div id="y-axis-label" class="axis-label">Y-axis (meters)</div>
+                    </div>
+                </div>
+                <div class="coords-display">
+                    Current position: <span id="currentPos">N/A</span> |
+                    Altitude: <span id="currentAlt">N/A</span>
+                </div>
+                <div id="controls">
+                    <button id="resetViewBtn">Reset View</button>
+                    <button id="toggleTrajectoryBtn">Toggle Trajectory</button>
+                    <button id="clearDataBtn">Clear Data</button>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Position Data</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>X (m)</th>
+                            <th>Y (m)</th>
+                            <th>Z (m)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="positionTable">
+                        <!-- Position data will be added by JavaScript -->
+                        <tr>
+                            <td colspan="4">No data available</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let mapEl = document.getElementById('map');
+        let mapRect = mapEl.getBoundingClientRect();
+        let mapWidth = mapRect.width;
+        let mapHeight = mapRect.height;
+        let showTrajectory = true;
+        
+        // Map scale (meters per pixel)
+        let xMin = -25, xMax = 25;
+        let yMin = -25, yMax = 25;
+        let xScale = mapWidth / (xMax - xMin);
+        let yScale = mapHeight / (yMax - yMin);
+        
+        // Convert world coordinates to screen coordinates
+        function worldToScreen(x, y) {
+            return {
+                x: (x - xMin) * xScale,
+                y: mapHeight - (y - yMin) * yScale  // Flip Y because screen coords are top-down
+            };
+        }
+        
+        // Draw grid
+        function drawGrid() {
+            // Clear existing grid
+            document.querySelectorAll('.grid-line, .grid-label').forEach(el => el.remove());
+            
+            // Determine grid spacing
+            const gridSpacing = 5; // meters
+            
+            // Draw horizontal grid lines
+            for (let y = Math.ceil(yMin / gridSpacing) * gridSpacing; y <= yMax; y += gridSpacing) {
+                if (y === 0) continue; // Skip zero line as it's part of the axes
+                
+                const pos = worldToScreen(xMin, y);
+                const gridLine = document.createElement('div');
+                gridLine.className = 'grid-line';
+                gridLine.style.left = '0';
+                gridLine.style.top = pos.y + 'px';
+                gridLine.style.width = '100%';
+                gridLine.style.height = '1px';
+                
+                const label = document.createElement('div');
+                label.className = 'grid-label';
+                label.style.left = '5px';
+                label.style.top = (pos.y - 7) + 'px';
+                label.textContent = y + 'm';
+                
+                mapEl.appendChild(gridLine);
+                mapEl.appendChild(label);
+            }
+            
+            // Draw vertical grid lines
+            for (let x = Math.ceil(xMin / gridSpacing) * gridSpacing; x <= xMax; x += gridSpacing) {
+                if (x === 0) continue; // Skip zero line as it's part of the axes
+                
+                const pos = worldToScreen(x, yMin);
+                const gridLine = document.createElement('div');
+                gridLine.className = 'grid-line';
+                gridLine.style.left = pos.x + 'px';
+                gridLine.style.top = '0';
+                gridLine.style.width = '1px';
+                gridLine.style.height = '100%';
+                
+                const label = document.createElement('div');
+                label.className = 'grid-label';
+                label.style.left = (pos.x - 10) + 'px';
+                label.style.top = (mapHeight - 20) + 'px';
+                label.textContent = x + 'm';
+                
+                mapEl.appendChild(gridLine);
+                mapEl.appendChild(label);
+            }
+            
+            // Draw X-axis
+            const xAxis = document.createElement('div');
+            xAxis.className = 'grid-line';
+            xAxis.style.left = '0';
+            xAxis.style.top = worldToScreen(0, 0).y + 'px';
+            xAxis.style.width = '100%';
+            xAxis.style.height = '2px';
+            xAxis.style.backgroundColor = 'rgba(0,0,0,0.3)';
+            
+            // Draw Y-axis
+            const yAxis = document.createElement('div');
+            yAxis.className = 'grid-line';
+            yAxis.style.left = worldToScreen(0, 0).x + 'px';
+            yAxis.style.top = '0';
+            yAxis.style.width = '2px';
+            yAxis.style.height = '100%';
+            yAxis.style.backgroundColor = 'rgba(0,0,0,0.3)';
+            
+            mapEl.appendChild(xAxis);
+            mapEl.appendChild(yAxis);
+            
+            // Zero label
+            const zeroLabel = document.createElement('div');
+            zeroLabel.className = 'grid-label';
+            zeroLabel.style.left = worldToScreen(0, 0).x + 'px';
+            zeroLabel.style.top = worldToScreen(0, 0).y + 'px';
+            zeroLabel.style.transform = 'translate(5px, 5px)';
+            zeroLabel.textContent = '0';
+            
+            mapEl.appendChild(zeroLabel);
+        }
+        
+        // Draw cameras
+        function drawCameras(cameras) {
+            // Remove existing cameras
+            document.querySelectorAll('.camera, .camera-label').forEach(el => el.remove());
+            
+            // Add new cameras
+            cameras.forEach(camera => {
+                const pos = worldToScreen(camera.position[0], camera.position[1]);
+                
+                // Calculate rotation angle for the camera direction indicator
+                let rotation = camera.azimuth;
+                
+                // Create camera element
+                const cameraEl = document.createElement('div');
+                cameraEl.className = 'camera';
+                cameraEl.style.left = pos.x + 'px';
+                cameraEl.style.top = pos.y + 'px';
+                cameraEl.style.setProperty('--rotation', rotation + 'deg');
+                
+                // Create label
+                const label = document.createElement('div');
+                label.className = 'camera-label';
+                label.style.left = pos.x + 'px';
+                label.style.top = pos.y + 'px';
+                label.textContent = camera.name;
+                
+                mapEl.appendChild(cameraEl);
+                mapEl.appendChild(label);
+            });
+        }
+        
+        // Draw drone and trajectory
+        function drawDroneAndTrajectory(positions) {
+            // Remove existing drone and trajectory
+            document.querySelectorAll('.drone, .trajectory').forEach(el => el.remove());
+            
+            if (positions.length === 0) return;
+            
+            // Draw trajectory points
+            if (showTrajectory) {
+                positions.forEach((pos, index) => {
+                    // Only draw a subset of points to avoid cluttering
+                    if (index % 5 !== 0 && index !== positions.length - 1) return;
+                    
+                    const screenPos = worldToScreen(pos.x, pos.y);
+                    
+                    // Create trajectory point
+                    const trajPoint = document.createElement('div');
+                    trajPoint.className = 'trajectory';
+                    trajPoint.style.left = screenPos.x + 'px';
+                    trajPoint.style.top = screenPos.y + 'px';
+                    
+                    // Size and opacity based on recency
+                    const opacity = 0.1 + 0.4 * (index / positions.length);
+                    const size = 6 + 4 * (index / positions.length);
+                    
+                    trajPoint.style.width = size + 'px';
+                    trajPoint.style.height = size + 'px';
+                    trajPoint.style.opacity = opacity;
+                    
+                    mapEl.appendChild(trajPoint);
+                });
+            }
+            
+            // Draw current drone position
+            const latestPos = positions[positions.length - 1];
+            const screenPos = worldToScreen(latestPos.x, latestPos.y);
+            
+            const droneEl = document.createElement('div');
+            droneEl.className = 'drone';
+            droneEl.style.left = screenPos.x + 'px';
+            droneEl.style.top = screenPos.y + 'px';
+            
+            mapEl.appendChild(droneEl);
+            
+            // Update position display
+            document.getElementById('currentPos').textContent = 
+                `X: ${latestPos.x.toFixed(2)}m, Y: ${latestPos.y.toFixed(2)}m`;
+            document.getElementById('currentAlt').textContent = 
+                `Z: ${latestPos.z.toFixed(2)}m`;
+        }
+        
+        // Update position table
+        function updatePositionTable(positions) {
+            const tableBody = document.getElementById('positionTable');
+            tableBody.innerHTML = '';
+            
+            // Show the most recent positions first (last 10)
+            const recentPositions = positions.slice(-10).reverse();
+            
+            recentPositions.forEach(pos => {
+                const row = document.createElement('tr');
+                
+                const timeCell = document.createElement('td');
+                const time = new Date(pos.time * 1000).toLocaleTimeString();
+                timeCell.textContent = time;
+                
+                const xCell = document.createElement('td');
+                xCell.textContent = pos.x.toFixed(2);
+                
+                const yCell = document.createElement('td');
+                yCell.textContent = pos.y.toFixed(2);
+                
+                const zCell = document.createElement('td');
+                zCell.textContent = pos.z.toFixed(2);
+                
+                row.appendChild(timeCell);
+                row.appendChild(xCell);
+                row.appendChild(yCell);
+                row.appendChild(zCell);
+                
+                tableBody.appendChild(row);
+            });
+            
+            if (recentPositions.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 4;
+                cell.textContent = 'No data available';
+                row.appendChild(cell);
+                tableBody.appendChild(row);
+            }
+        }
+        
+        // Reset view to default boundaries
+        function resetView() {
+            xMin = -25;
+            xMax = 25;
+            yMin = -25;
+            yMax = 25;
+            xScale = mapWidth / (xMax - xMin);
+            yScale = mapHeight / (yMax - yMin);
+            
+            // Redraw everything
+            drawGrid();
+            
+            // Refetch data to redraw cameras and drone
+            fetchData();
+        }
+        
+        // Toggle trajectory visibility
+        function toggleTrajectory() {
+            showTrajectory = !showTrajectory;
+            document.getElementById('toggleTrajectoryBtn').textContent = 
+                showTrajectory ? 'Hide Trajectory' : 'Show Trajectory';
+            
+            // Refetch data to update display
+            fetchData();
+        }
+        
+        // Clear all position data
+        function clearData() {
+            // Not actually clearing server data, just redrawing without trajectory
+            document.querySelectorAll('.trajectory').forEach(el => el.remove());
+        }
+        
+        // Fetch data from server
+        function fetchData() {
+            fetch('data.json?' + new Date().getTime())
+                .then(response => response.json())
+                .then(data => {
+                    // Update status
+                    document.getElementById('status').textContent = 'Receiving data';
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                    document.getElementById('activeCameras').textContent = Object.keys(data.cameras).length;
+                    // Update status indicators
+                    if (data.positions.length > 0) {
+                        // Get the latest position timestamp
+                        const latestPos = data.positions[data.positions.length - 1];
+                        const now = new Date().getTime() / 1000;
+                        const timeSinceLastDetection = now - latestPos.time;
+                        
+                        // If we've detected a position in the last 5 seconds, show drone detected indicator
+                        if (timeSinceLastDetection < 5) {
+                            document.getElementById('noDetectionLed').classList.remove('green');
+                            document.getElementById('noDetectionLed').style.backgroundColor = '#ccc';
+                            
+                            document.getElementById('detectionLed').classList.add('red', 'blinking');
+                        } else {
+                            document.getElementById('noDetectionLed').classList.add('green');
+                            
+                            document.getElementById('detectionLed').classList.remove('red', 'blinking');
+                            document.getElementById('detectionLed').style.backgroundColor = '#ccc';
+                        }
+                    } else {
+                        // No positions at all, show no detection indicator
+                        document.getElementById('noDetectionLed').classList.add('green');
+                        
+                        document.getElementById('detectionLed').classList.remove('red', 'blinking');
+                        document.getElementById('detectionLed').style.backgroundColor = '#ccc';
+                    }
+                    
+                    // Draw cameras
+                    drawCameras(data.cameras);
+                    
+                    // Draw drone and trajectory if there's position data
+                    if (data.positions.length > 0) {
+                        drawDroneAndTrajectory(data.positions);
+                        updatePositionTable(data.positions);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('status').textContent = 'Error: ' + error.message;
+                });
+        }
+        
+        // Handle window resize
+        function handleResize() {
+            mapRect = mapEl.getBoundingClientRect();
+            mapWidth = mapRect.width;
+            mapHeight = mapRect.height;
+            xScale = mapWidth / (xMax - xMin);
+            yScale = mapHeight / (yMax - yMin);
+            
+            // Redraw everything
+            drawGrid();
+            fetchData();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Draw initial grid
+            drawGrid();
+            
+            // Set up event listeners
+            document.getElementById('resetViewBtn').addEventListener('click', resetView);
+            document.getElementById('toggleTrajectoryBtn').addEventListener('click', toggleTrajectory);
+            document.getElementById('clearDataBtn').addEventListener('click', clearData);
+            
+            // Handle window resize
+            window.addEventListener('resize', handleResize);
+            
+            // Start fetching data
+            fetchData();
+            setInterval(fetchData, 500);
+        });
+    </script>
+</body>
+</html>

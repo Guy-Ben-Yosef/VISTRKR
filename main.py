@@ -323,13 +323,14 @@ if __name__ == '__main__':
     # Write the cameras data to an XML file
     write_cameras_data_to_xml(cameras_data, p)
 
-    N = 60
-    rounds = 2
+    N = 80
+    rounds = 3
     max_z = 5
+    R = 5
     t = np.linspace(0, rounds * 2 * np.pi, N)
-    x = np.cos(t)
-    y = np.sin(t)
-    z = np.linspace(0, max_z, N)
+    x = R*np.cos(t)
+    y = R*np.sin(t)
+    z = np.linspace(1, max_z, N)
     points = np.stack((x, y, z), axis=1)
     points_as_list = []
     for i in range(points.shape[0]):
@@ -337,7 +338,7 @@ if __name__ == '__main__':
     measurements_by_camera = simulate_data(cameras_data, points_as_list, noise_std=20)
     
     simulate_detection_by_camera(
-        measurements_by_camera, "2025/03/17-21:41", 
+        measurements_by_camera, "2025/03/17-22:44", 
         freq=1, time_var=0.05, output_file_path='data')
 
     ps = estimate_position(cameras_data, measurements_by_camera)
