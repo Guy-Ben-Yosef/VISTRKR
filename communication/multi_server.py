@@ -4,6 +4,8 @@ import json
 import time
 from datetime import datetime
 import os
+import json
+from collections import defaultdict
 
 class DataServer:
     def __init__(self, host='0.0.0.0', port=5000):
@@ -93,10 +95,13 @@ class DataServer:
                         json_data = json.loads(decoded_data)
                         print(f"[*] Received from {addr[0]}: {json_data}")
                         
-                        # Save data to file with timestamp
+                        # Save data to file with timestamp (original format)
                         with open(client_file, 'a') as f:
                             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             f.write(f"[{timestamp}] {json.dumps(json_data)}\n")
+                        
+                        # Also save in JSON format for easier analysis
+                        self.save_json_data(addr[0], json_data)
                         
                         # Update last data time
                         self.clients[client_id]["last_data_time"] = datetime.now()
@@ -158,6 +163,38 @@ class DataServer:
                 last_data = "Never" if not info["last_data_time"] else info["last_data_time"].strftime("%Y-%m-%d %H:%M:%S")
                 print(f"Client {ip}:{port} - Connected: {connected_time}, Last data: {last_data}")
         print("========================\n")
+
+    def save_json_data(self, client_id, data):
+        """Save data in JSON format for better analysis"""
+        json_file = os.path.join(self.data_directory, f"client_{client_id}.json")
+        
+        try:
+            # Read existing data if file exists
+            if os.path.exists(json_file):
+                with open(json_file, 'r') as f:
+                    try:
+                        existing_data = json.load(f)
+                        if not isinstance(existing_data, list):
+                            existing_data = [existing_data]
+                    except json.JSONDecodeError:
+                        # Handle corrupted JSON file
+                        existing_data = []
+            else:
+                existing_data = []
+            
+            # Add timestamp information
+            if isinstance(data, dict):
+                data['server_timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            # Append new data
+            existing_data.append(data)
+            
+            # Save to file
+            with open(json_file, 'w') as f:
+                json.dump(existing_data, f, indent=2)
+                
+        except Exception as e:
+            print(f"[-] Error saving JSON data for client {client_id}: {e}")
 
 # Run the server if this file is executed directly
 if __name__ == "__main__":
