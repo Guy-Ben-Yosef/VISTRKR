@@ -304,8 +304,8 @@
         let showTrajectory = true;
         
         // Map scale (meters per pixel)
-        let xMin = -25, xMax = 25;
-        let yMin = -25, yMax = 25;
+        let xMin = -5, xMax = 45;
+        let yMin = -5, yMax = 45;
         let xScale = mapWidth / (xMax - xMin);
         let yScale = mapHeight / (yMax - yMin);
         
@@ -527,10 +527,10 @@
         
         // Reset view to default boundaries
         function resetView() {
-            xMin = -25;
-            xMax = 25;
-            yMin = -25;
-            yMax = 25;
+            xMin = -5;
+            xMax = 45;
+            yMin = -5;
+            yMax = 45;
             xScale = mapWidth / (xMax - xMin);
             yScale = mapHeight / (yMax - yMin);
             
