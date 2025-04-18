@@ -12,3 +12,11 @@ Main Features:
 * Real-time tracking: The algorithms are optimized for real-time tracking of hostile drones, allowing for quick and accurate response to changing situations.
 * Performance optimization: The code is designed to be efficient and optimized for performance, ensuring minimal processing delay and high accuracy.
 * Python implementation: The algorithms are implemented in Python, making it easy to integrate into existing systems and workflows.
+
+## Watch on YouTube
+### Drone Tracking UI
+[![Watch the video](https://raw.githubusercontent.com/Guy-Ben-Yosef/VISTRKR/refs/heads/master/static/YouTube_Thumbnail_Tracking.png)](https://www.youtube.com/watch?v=gjpYDwO0i9w)
+
+### Drone Detection
+[![Watch the video](https://raw.githubusercontent.com/Guy-Ben-Yosef/VISTRKR/refs/heads/master/static/Youtube_Thumbnail_Detection.png)](https://www.youtube.com/watch?v=2WPb2QX0F38)
+
